@@ -23,9 +23,12 @@ class TodoListView extends ConsumerWidget {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(LucideIcons.listFilter),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(LucideIcons.listFilter),
+            ),
           ),
         ],
       ),
@@ -34,6 +37,7 @@ class TodoListView extends ConsumerWidget {
         child: Column(
           children: [
             TextField(
+              cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: "검색어를 입력하세요",
                 prefixIcon: const Icon(LucideIcons.search),
@@ -82,55 +86,71 @@ class TodoListView extends ConsumerWidget {
             Expanded(
               child: ListView.builder(
                 itemCount: 10,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.grey.shade300, width: 2),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: ListTile(
-                      leading: Transform.scale(
-                        scale: 1.2,
-                        child: Checkbox(
-                          value: false,
-                          activeColor: Colors.black,
-                          checkColor: Colors.white,
-                          side: BorderSide(
-                            color: Colors.grey.shade400,
-                            width: 1.0,
+                itemBuilder: (context, index) {
+                  final isCompleted = false;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.grey.shade200, width: 1),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: ListTile(
+                        leading: Transform.scale(
+                          scale: 1.2,
+                          child: Checkbox(
+                            value: isCompleted,
+                            activeColor: Colors.black,
+                            checkColor: Colors.white,
+                            side: BorderSide(
+                              color: Colors.grey.shade400,
+                              width: 1.0,
+                            ),
+                            onChanged: (bool? value) {},
                           ),
-                          onChanged: (bool? value) {},
                         ),
-                      ),
-                      title: Text(
-                        "할 일 $index",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                        title: Text(
+                          "할 일 $index",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: isCompleted
+                                ? Colors.grey[600]
+                                : Colors.black,
+                            decoration: isCompleted
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
                         ),
-                      ),
-                      subtitle: Text(
-                        "할 일 $index에 대한 상세 설명입니다",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      trailing: IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          LucideIcons.trash2,
-                          color: Colors.grey[700],
-                          size: 20,
+                        subtitle: Text(
+                          "할 일 $index에 대한 상세 설명입니다",
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                            decoration: isCompleted
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        trailing: IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            LucideIcons.trash2,
+                            color: Colors.grey[700],
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ],
