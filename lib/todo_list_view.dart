@@ -90,7 +90,7 @@ class TodoListView extends ConsumerWidget {
                   final isCompleted = false;
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: const EdgeInsets.symmetric(vertical: 3),
                     child: Card(
                       color: Colors.white,
                       elevation: 2,
