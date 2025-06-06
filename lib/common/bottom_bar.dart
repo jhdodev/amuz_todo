@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class BottomBar extends StatelessWidget {
   const BottomBar({super.key, required this.currentIndex, this.onTap});
@@ -18,10 +19,16 @@ class BottomBar extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       items: [
         /// Todo
-        const BottomNavigationBarItem(icon: Icon(Icons.list), label: '할 일'),
+        const BottomNavigationBarItem(
+          icon: Icon(LucideIcons.listChecks),
+          label: '할 일',
+        ),
 
         /// Settings
-        const BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+        const BottomNavigationBarItem(
+          icon: Icon(LucideIcons.settings),
+          label: '설정',
+        ),
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 // 필터 상태를 관리하는 provider
 final filterProvider = StateProvider<String>((ref) => 'All');
@@ -21,18 +22,32 @@ class TodoListView extends ConsumerWidget {
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(LucideIcons.listFilter),
+          ),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
             TextField(
               decoration: InputDecoration(
                 hintText: "검색어를 입력하세요",
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: const Icon(Icons.close),
+                prefixIcon: const Icon(LucideIcons.search),
+                suffixIcon: const Icon(LucideIcons.x),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    width: 3,
+                  ),
                 ),
               ),
             ),
@@ -46,6 +61,10 @@ class TodoListView extends ConsumerWidget {
                 child: Row(
                   children: [
                     _buildFilterButton('전체', selectedFilter, ref),
+                    const SizedBox(width: 10),
+                    _buildFilterButton('미완료', selectedFilter, ref),
+                    const SizedBox(width: 10),
+                    _buildFilterButton('완료', selectedFilter, ref),
                     const SizedBox(width: 10),
                     _buildFilterButton('#개발', selectedFilter, ref),
                     const SizedBox(width: 10),
@@ -63,8 +82,55 @@ class TodoListView extends ConsumerWidget {
             Expanded(
               child: ListView.builder(
                 itemCount: 10,
-                itemBuilder: (context, index) =>
-                    ListTile(title: Text("할 일 $index")),
+                itemBuilder: (context, index) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Card(
+                    color: Colors.white,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey.shade300, width: 2),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: ListTile(
+                      leading: Transform.scale(
+                        scale: 1.2,
+                        child: Checkbox(
+                          value: false,
+                          activeColor: Colors.black,
+                          checkColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.grey.shade400,
+                            width: 1.0,
+                          ),
+                          onChanged: (bool? value) {},
+                        ),
+                      ),
+                      title: Text(
+                        "할 일 $index",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Text(
+                        "할 일 $index에 대한 상세 설명입니다",
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      trailing: IconButton(
+                        onPressed: () {},
+                        icon: Icon(
+                          LucideIcons.trash2,
+                          color: Colors.grey[700],
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -75,7 +141,7 @@ class TodoListView extends ConsumerWidget {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         shape: CircleBorder(),
-        child: const Icon(Icons.add),
+        child: const Icon(LucideIcons.plus),
       ),
     );
   }
