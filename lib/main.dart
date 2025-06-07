@@ -1,4 +1,7 @@
+import 'package:amuz_todo/add_todo_view.dart';
+import 'package:amuz_todo/detail_todo_view.dart';
 import 'package:amuz_todo/home_page.dart';
+import 'package:amuz_todo/login_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -23,7 +26,13 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const HomePage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const LoginView(),
+        '/home': (context) => const HomePage(),
+        '/add-todo': (context) => const AddTodoView(),
+        '/detail-todo': (context) => const DetailTodoView(),
+      },
     );
   }
 }
