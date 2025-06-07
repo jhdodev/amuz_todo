@@ -184,7 +184,7 @@ class SettingsView extends ConsumerWidget {
             const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.black,
                 minimumSize: const Size(double.infinity, 60),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),
@@ -194,7 +194,7 @@ class SettingsView extends ConsumerWidget {
               child: const Text(
                 '계정 삭제',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.red,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
