@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -52,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         hintText: '이메일',
-                        prefixIcon: const Icon(Icons.email, size: 20),
+                        prefixIcon: const Icon(LucideIcons.mail, size: 20),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
@@ -87,7 +88,7 @@ class _LoginViewState extends State<LoginView> {
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: '비밀번호',
-                        prefixIcon: const Icon(Icons.lock, size: 20),
+                        prefixIcon: const Icon(LucideIcons.lock, size: 20),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
