@@ -22,12 +22,28 @@ class TodoListView extends ConsumerWidget {
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(LucideIcons.listFilter),
+          ),
+        ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(LucideIcons.listFilter),
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              children: [
+                ClipOval(
+                  child: Image.asset(
+                    'assets/images/default_profile_black.png',
+                    width: 28,
+                    height: 28,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text('amuz', style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
             ),
           ),
         ],
