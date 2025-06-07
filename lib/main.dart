@@ -2,6 +2,7 @@ import 'package:amuz_todo/add_todo_view.dart';
 import 'package:amuz_todo/detail_todo_view.dart';
 import 'package:amuz_todo/home_page.dart';
 import 'package:amuz_todo/login_view.dart';
+import 'package:amuz_todo/sign_up_view.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/add-todo': (context) => const AddTodoView(),
         '/detail-todo': (context) => const DetailTodoView(),
+        '/sign-up': (context) => const SignUpView(),
       },
     );
   }
