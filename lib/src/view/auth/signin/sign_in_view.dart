@@ -1,0 +1,222 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'sign_in_view_model.dart';
+
+class SignInView extends ConsumerStatefulWidget {
+  const SignInView({super.key});
+
+  @override
+  ConsumerState<SignInView> createState() => _SignInViewState();
+}
+
+class _SignInViewState extends ConsumerState<SignInView> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final viewModel = ref.watch(signInViewModelProvider);
+
+    ref.listen(signInViewModelProvider, (previous, next) {
+      if (next.isSignInSuccessful) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('로그인되었습니다!')));
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    });
+
+    return Stack(
+      children: [
+        Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Text(
+                        'amuz todo',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: '이메일',
+                        prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            width: 3,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '이메일을 입력해주세요';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: '비밀번호',
+                        prefixIcon: const Icon(LucideIcons.lock, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            width: 3,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '비밀번호를 입력해주세요';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (viewModel.errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Text(
+                          viewModel.errorMessage!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
+                    ElevatedButton(
+                      onPressed: viewModel.isBusy
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                ref
+                                    .read(signInViewModelProvider.notifier)
+                                    .signIn(
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                    );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: viewModel.isBusy
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              '로그인',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("계정이 없으신가요?"),
+                        const SizedBox(width: 10),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/signUp');
+                          },
+                          child: const Text(
+                            '회원가입',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (viewModel.isBusy)
+          Container(
+            color: Colors.black.withOpacity(0.5),
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+      ],
+    );
+  }
+}
