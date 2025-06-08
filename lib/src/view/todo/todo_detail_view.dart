@@ -3,14 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class DetailTodoView extends ConsumerStatefulWidget {
-  const DetailTodoView({super.key});
+class TodoDetailView extends ConsumerStatefulWidget {
+  const TodoDetailView({super.key});
 
   @override
-  ConsumerState<DetailTodoView> createState() => _DetailTodoViewState();
+  ConsumerState<TodoDetailView> createState() => _TodoDetailViewState();
 }
 
-class _DetailTodoViewState extends ConsumerState<DetailTodoView> {
+class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   String selectedPriority = '중요도 보통';
   DateTime selectedDate = DateTime.now();
 
@@ -196,29 +196,56 @@ class _DetailTodoViewState extends ConsumerState<DetailTodoView> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                TextField(
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: "할 일에 대한 설명을 입력해주세요.",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        cursorColor: Colors.black,
+                        decoration: InputDecoration(
+                          hintText: "설명을 입력해주세요.",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: Colors.grey.shade300,
+                              width: 2,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: Colors.black.withValues(alpha: 0.4),
+                              width: 3,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        width: 3,
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Container(
+                        width: 68,
+                        height: 51,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.add_photo_alternate_outlined,
+                          color: Colors.grey,
+                          size: 30,
+                        ),
                       ),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 Align(
