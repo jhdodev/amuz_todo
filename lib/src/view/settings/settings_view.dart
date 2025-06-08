@@ -1,11 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:amuz_todo/src/service/auth_service.dart';
+import 'package:amuz_todo/src/repository/auth_repository.dart';
+import 'package:amuz_todo/src/view/settings/settings_view_model.dart';
+import 'package:amuz_todo/src/view/settings/settings_view_state.dart';
+
+// Provider들
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService(AuthRepository());
+});
+
+final settingsViewModelProvider =
+    StateNotifierProvider<SettingsViewModel, SettingsViewState>((ref) {
+      final authService = ref.watch(authServiceProvider);
+      return SettingsViewModel(authService);
+    });
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(settingsViewModelProvider);
+    final viewModel = ref.read(settingsViewModelProvider.notifier);
+
+    // 에러 처리
+    ref.listen<SettingsViewState>(settingsViewModelProvider, (previous, next) {
+      if (next.status == SettingsViewStatus.error &&
+          next.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+        // 에러 메시지 표시 후 초기화
+        Future.delayed(const Duration(seconds: 1), () {
+          viewModel.clearError();
+        });
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -171,15 +206,26 @@ class SettingsView extends ConsumerWidget {
                   borderRadius: BorderRadius.all(Radius.circular(14)),
                 ),
               ),
-              onPressed: () {},
-              child: const Text(
-                '로그아웃',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              onPressed: state.isSigningOut
+                  ? null
+                  : () => viewModel.signOut(context),
+              child: state.isSigningOut
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.redAccent,
+                      ),
+                    )
+                  : const Text(
+                      '로그아웃',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -190,15 +236,26 @@ class SettingsView extends ConsumerWidget {
                   borderRadius: BorderRadius.all(Radius.circular(14)),
                 ),
               ),
-              onPressed: () => {},
-              child: const Text(
-                '계정 삭제',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              onPressed: state.isDeletingAccount
+                  ? null
+                  : () => viewModel.deleteAccount(context),
+              child: state.isDeletingAccount
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.red,
+                      ),
+                    )
+                  : const Text(
+                      '계정 삭제',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ],
         ),

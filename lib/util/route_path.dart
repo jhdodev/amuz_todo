@@ -4,8 +4,8 @@
 class RoutePath {
   RoutePath._();
 
-  /// 로그인 페이지 (초기 화면)
-  static const String signIn = '/';
+  /// 로그인 페이지
+  static const String signIn = '/signIn';
 
   /// 홈 페이지
   static const String home = '/home';

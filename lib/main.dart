@@ -26,6 +26,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 세션 확인
+    final session = Supabase.instance.client.auth.currentSession;
+    print('!! 세션 확인 - session: ${session != null ? '있음' : '없음'}');
+
     return MaterialApp(
       theme: ThemeData(
         fontFamily: "Pretendard",
@@ -39,7 +43,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: RoutePath.signIn,
+      home: session != null ? const HomeView() : const SignInView(),
       routes: {
         RoutePath.signIn: (context) => const SignInView(),
         RoutePath.home: (context) => const HomeView(),
