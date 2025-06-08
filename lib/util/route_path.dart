@@ -5,17 +5,17 @@ class RoutePath {
   RoutePath._();
 
   /// 로그인 페이지 (초기 화면)
-  static const String login = '/';
+  static const String signIn = '/';
 
   /// 홈 페이지
   static const String home = '/home';
 
   /// 할 일 추가 페이지
-  static const String addTodo = '/add-todo';
+  static const String todoAdd = '/todoAdd';
 
   /// 할 일 상세 페이지
-  static const String detailTodo = '/detail-todo';
+  static const String todoDetail = '/todoDetail';
 
   /// 회원가입 페이지
-  static const String signUp = '/sign-up';
+  static const String signUp = '/signUp';
 }
