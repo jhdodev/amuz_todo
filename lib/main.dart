@@ -1,8 +1,9 @@
-import 'package:amuz_todo/add_todo_view.dart';
-import 'package:amuz_todo/detail_todo_view.dart';
-import 'package:amuz_todo/home_page.dart';
-import 'package:amuz_todo/login_view.dart';
-import 'package:amuz_todo/sign_up_view.dart';
+import 'package:amuz_todo/src/view/todo/add_todo_view.dart';
+import 'package:amuz_todo/src/view/todo/detail_todo_view.dart';
+import 'package:amuz_todo/src/view/home_view.dart';
+import 'package:amuz_todo/src/view/login/login_view.dart';
+import 'package:amuz_todo/src/view/signup/sign_up_view.dart';
+import 'package:amuz_todo/util/route_path.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -27,13 +28,13 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: RoutePath.login,
       routes: {
-        '/': (context) => const LoginView(),
-        '/home': (context) => const HomePage(),
-        '/add-todo': (context) => const AddTodoView(),
-        '/detail-todo': (context) => const DetailTodoView(),
-        '/sign-up': (context) => const SignUpView(),
+        RoutePath.login: (context) => const LoginView(),
+        RoutePath.home: (context) => const HomeView(),
+        RoutePath.addTodo: (context) => const AddTodoView(),
+        RoutePath.detailTodo: (context) => const DetailTodoView(),
+        RoutePath.signUp: (context) => const SignUpView(),
       },
     );
   }
