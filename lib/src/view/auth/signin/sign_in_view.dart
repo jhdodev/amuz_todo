@@ -211,11 +211,6 @@ class _SignInViewState extends ConsumerState<SignInView> {
             ),
           ),
         ),
-        if (viewModel.isBusy)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(child: CircularProgressIndicator()),
-          ),
       ],
     );
   }
