@@ -5,9 +5,19 @@ import 'package:amuz_todo/src/view/login/login_view.dart';
 import 'package:amuz_todo/src/view/signup/sign_up_view.dart';
 import 'package:amuz_todo/util/route_path.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: ".env");
+
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
