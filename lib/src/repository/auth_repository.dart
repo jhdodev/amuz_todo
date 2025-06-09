@@ -97,8 +97,29 @@ class AuthRepository {
 
   Future<void> deleteUserProfile(String userId) async {
     try {
-      await _supabase.from('user_profiles').delete().eq('id', userId);
+      print('🔥 AuthRepository: Edge Function으로 계정 삭제 시작 - userId: $userId');
+
+      // Edge Function 호출
+      final response = await _supabase.functions.invoke(
+        'delete-user', // Edge Function 이름
+        body: {'userId': userId},
+      );
+
+      print('🔥 AuthRepository: Edge Function 응답 상태: ${response.status}');
+      print('🔥 AuthRepository: Edge Function 응답 데이터: ${response.data}');
+
+      if (response.status != 200) {
+        throw Exception('Edge Function 에러: ${response.data}');
+      }
+
+      // 응답 데이터 확인
+      if (response.data['success'] != true) {
+        throw Exception('계정 삭제 실패: ${response.data['error']}');
+      }
+
+      print('🔥 AuthRepository: Edge Function으로 계정 삭제 완료');
     } catch (e) {
+      print('🔥 AuthRepository: Edge Function 호출 에러: $e');
       throw Exception('사용자 프로필 삭제 실패: $e');
     }
   }

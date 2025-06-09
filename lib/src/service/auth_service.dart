@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:amuz_todo/src/repository/auth_repository.dart';
 import 'package:amuz_todo/src/model/user.dart' as app_user;
@@ -10,6 +11,27 @@ class AuthService {
   User? get currentAuthUser => _authRepository.currentAuthUser;
 
   Stream<AuthState> get authStateChanges => _authRepository.authStateChanges;
+
+  Stream<app_user.User?> get currentUserStream async* {
+    await for (final authState in _authRepository.authStateChanges) {
+      print('🔥 AuthService: 인증 상태 변화 감지 - ${authState.event}');
+
+      if (authState.session?.user == null) {
+        print('🔥 AuthService: 로그아웃됨, null 반환');
+        yield null;
+      } else {
+        try {
+          print('🔥 AuthService: 로그인됨, 사용자 정보 로딩 중...');
+          final user = await getCurrentUserProfile();
+          print('🔥 AuthService: 사용자 정보 로딩 완료 - ${user?.name}');
+          yield user;
+        } catch (e) {
+          print('🔥 AuthService: 사용자 정보 로딩 에러 - $e');
+          yield null;
+        }
+      }
+    }
+  }
 
   Future<app_user.User> signUp({
     required String email,
@@ -134,13 +156,32 @@ class AuthService {
     }
   }
 
-  Future<app_user.User> updateProfileImageToNull({
-    required String userId,
-  }) async {
-    try {
-      print('🔥 AuthService: updateProfileImageToNull 시작 - userId: $userId');
+  Future<app_user.User> updateProfileImage(String imageUrl) async {
+    final currentUser = currentAuthUser;
+    if (currentUser == null) {
+      throw Exception('로그인이 필요합니다');
+    }
 
-      final currentProfile = await _authRepository.getUserProfile(userId);
+    return await updateProfile(
+      userId: currentUser.id,
+      profileImageUrl: imageUrl,
+    );
+  }
+
+  Future<app_user.User> updateProfileImageToNull() async {
+    final currentUser = currentAuthUser;
+    if (currentUser == null) {
+      throw Exception('로그인이 필요합니다');
+    }
+
+    try {
+      print(
+        '🔥 AuthService: updateProfileImageToNull 시작 - userId: ${currentUser.id}',
+      );
+
+      final currentProfile = await _authRepository.getUserProfile(
+        currentUser.id,
+      );
       print('🔥 AuthService: 현재 프로필 조회 완료');
 
       final updatedProfile = app_user.User(
@@ -189,3 +230,12 @@ class AuthService {
     }
   }
 }
+
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService(AuthRepository());
+});
+
+final currentUserProvider = StreamProvider<app_user.User?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return authService.currentUserStream;
+});

@@ -1,4 +1,4 @@
-import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
+import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -12,6 +12,7 @@ class TodoListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFilter = ref.watch(filterProvider);
+    final currentUserAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -33,29 +34,24 @@ class TodoListView extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: Consumer(
-              builder: (context, ref, child) {
-                final todoListState = ref.watch(todoListViewModelProvider);
-                final user = todoListState.currentUser;
-
-                return Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 14,
-                      backgroundImage: user?.profileImageUrl != null
-                          ? NetworkImage(user!.profileImageUrl!)
-                          : AssetImage(
-                              'assets/images/default_profile_black.png',
-                            ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      user?.name ?? 'default',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                );
-              },
+            child: Row(
+              children: [
+                currentUserAsync.when(
+                  data: (user) => CircleAvatar(
+                    radius: 14,
+                    backgroundImage: user?.profileImageUrl != null
+                        ? NetworkImage(user!.profileImageUrl!)
+                        : AssetImage('assets/images/default_profile_black.png'),
+                  ),
+                  error: (error, stack) => const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  currentUserAsync.value?.name ?? 'default',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         ],

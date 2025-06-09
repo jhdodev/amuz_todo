@@ -9,28 +9,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingsViewModel extends StateNotifier<SettingsViewState> {
-  final AuthService _authService;
   final ImagePicker _imagePicker = ImagePicker();
   final SupabaseClient _supabase = Supabase.instance.client;
+  final Ref _ref;
 
-  SettingsViewModel(this._authService) : super(const SettingsViewState()) {
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    state = state.copyWith(isLoadingUser: true);
-
-    try {
-      final user = await _authService.getCurrentUserProfile();
-      state = state.copyWith(currentUser: user, isLoadingUser: false);
-    } catch (e) {
-      print('🔥 SettingsViewModel: 사용자 정보 로딩 에러: $e');
-      state = state.copyWith(
-        isLoadingUser: false,
-        errorMessage: '사용자 정보를 불러올 수 없습니다: $e',
-      );
-    }
-  }
+  SettingsViewModel(this._ref) : super(const SettingsViewState());
 
   /// 갤러리에서 이미지 선택
   Future<void> pickImageFromGallery() async {
@@ -58,31 +41,18 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
 
   /// 프로필 이미지 업로드
   Future<void> _uploadProfileImage(String imagePath) async {
-    if (state.currentUser == null) {
-      print('🔥 SettingsViewModel: 현재 사용자 정보 없음');
-      return;
-    }
-
     state = state.copyWith(isUpdatingProfile: true);
 
     try {
       print('🔥 SettingsViewModel: 프로필 이미지 업로드 시작');
 
-      // 🔄 변경: 기존 이미지 삭제 로직 제거, 바로 업로드
       final imageUrl = await _uploadToSupabaseStorage(imagePath);
       print('🔥 SettingsViewModel: Supabase Storage 업로드 완료 - $imageUrl');
 
-      // AuthService를 통해 user_profiles 테이블 업데이트
-      final updatedUser = await _authService.updateProfile(
-        userId: state.currentUser!.id,
-        profileImageUrl: imageUrl,
-      );
+      final authService = _ref.read(authServiceProvider);
+      await authService.updateProfileImage(imageUrl);
 
-      state = state.copyWith(
-        currentUser: updatedUser,
-        isUpdatingProfile: false,
-      );
-
+      state = state.copyWith(isUpdatingProfile: false);
       print('🔥 SettingsViewModel: 프로필 이미지 업데이트 완료');
     } catch (e) {
       print('🔥 SettingsViewModel: 프로필 이미지 업로드 에러: $e');
@@ -127,27 +97,16 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
 
   /// 기본 이미지로 변경
   Future<void> removeProfileImage() async {
-    if (state.currentUser == null) {
-      print('🔥 SettingsViewModel: 현재 사용자 정보 없음');
-      return;
-    }
-
     state = state.copyWith(isUpdatingProfile: true);
 
     try {
       print('🔥 SettingsViewModel: 기본 이미지로 변경 시작');
 
-      final updatedUser = await _authService.updateProfileImageToNull(
-        userId: state.currentUser!.id,
-      );
+      final authService = _ref.read(authServiceProvider);
+      await authService.updateProfileImageToNull();
 
-      state = state.copyWith(
-        currentUser: updatedUser,
-        isUpdatingProfile: false,
-      );
-
+      state = state.copyWith(isUpdatingProfile: false);
       print('🔥 SettingsViewModel: 기본 이미지로 변경 완료');
-      print('🔥 SettingsViewModel: 최종 URL: ${updatedUser.profileImageUrl}');
     } catch (e) {
       print('🔥 SettingsViewModel: 기본 이미지로 변경 에러: $e');
       state = state.copyWith(
@@ -157,46 +116,39 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
     }
   }
 
-  /// 사용자 정보 새로고침
-  Future<void> refreshUser() async {
-    await _loadCurrentUser();
-  }
-
   /// 로그아웃
   Future<void> signOut(BuildContext context) async {
     try {
       print('🔥 SettingsViewModel: 로그아웃 시작');
 
-      // 로그아웃 로딩 상태 설정
       state = state.copyWith(
         isSigningOut: true,
         status: SettingsViewStatus.loading,
       );
 
-      await _authService.signOut();
+      final authService = _ref.read(authServiceProvider);
+      await authService.signOut();
 
       print('🔥 SettingsViewModel: 로그아웃 성공');
 
-      // 성공 상태 설정
       state = state.copyWith(
         isSigningOut: false,
         status: SettingsViewStatus.success,
       );
 
-      // 로그인 페이지로 이동
       if (context.mounted) {
-        Navigator.of(
+        Navigator.pushNamedAndRemoveUntil(
           context,
-        ).pushNamedAndRemoveUntil(RoutePath.signIn, (route) => false);
+          RoutePath.signIn,
+          (route) => false,
+        );
       }
     } catch (e) {
-      print('🔥 SettingsViewModel - 로그아웃 에러: $e');
-
-      // 에러 상태 설정
+      print('🔥 SettingsViewModel: 로그아웃 에러: $e');
       state = state.copyWith(
         isSigningOut: false,
         status: SettingsViewStatus.error,
-        errorMessage: '로그아웃 중 에러가 발생했습니다: $e',
+        errorMessage: '로그아웃에 실패했습니다: $e',
       );
     }
   }
@@ -211,7 +163,8 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
         status: SettingsViewStatus.loading,
       );
 
-      await _authService.deleteAccount();
+      final authService = _ref.read(authServiceProvider);
+      await authService.deleteAccount();
 
       print('🔥 SettingsViewModel: 계정 삭제 성공');
 
@@ -221,26 +174,24 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
       );
 
       if (context.mounted) {
-        Navigator.of(
+        Navigator.pushNamedAndRemoveUntil(
           context,
-        ).pushNamedAndRemoveUntil(RoutePath.signIn, (route) => false);
+          RoutePath.signIn,
+          (route) => false,
+        );
       }
     } catch (e) {
       print('🔥 SettingsViewModel: 계정 삭제 에러: $e');
-
       state = state.copyWith(
         isDeletingAccount: false,
         status: SettingsViewStatus.error,
-        errorMessage: '계정 삭제 중 에러가 발생했습니다: $e',
+        errorMessage: '계정 삭제에 실패했습니다: $e',
       );
     }
   }
-
-  /// 에러 메시지 초기화
-  void clearError() {
-    state = state.copyWith(
-      status: SettingsViewStatus.initial,
-      errorMessage: null,
-    );
-  }
 }
+
+final settingsViewModelProvider =
+    StateNotifierProvider<SettingsViewModel, SettingsViewState>((ref) {
+      return SettingsViewModel(ref);
+    });

@@ -2,20 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
-import 'package:amuz_todo/src/repository/auth_repository.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_model.dart';
-import 'package:amuz_todo/src/view/settings/settings_view_state.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
-final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(AuthRepository());
-});
-
-final settingsViewModelProvider =
-    StateNotifierProvider<SettingsViewModel, SettingsViewState>((ref) {
-      final authService = ref.watch(authServiceProvider);
-      return SettingsViewModel(authService);
-    });
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
@@ -23,24 +11,7 @@ class SettingsView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(settingsViewModelProvider);
-    final viewModel = ref.read(settingsViewModelProvider.notifier);
-
-    // 에러 처리
-    ref.listen<SettingsViewState>(settingsViewModelProvider, (previous, next) {
-      if (next.status == SettingsViewStatus.error &&
-          next.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
-        );
-        // 에러 메시지 표시 후 초기화
-        Future.delayed(const Duration(seconds: 1), () {
-          viewModel.clearError();
-        });
-      }
-    });
+    final currentUserAsync = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -56,10 +27,9 @@ class SettingsView extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Consumer(
-              builder: (context, ref, child) {
+            currentUserAsync.when(
+              data: (user) {
                 final settingsState = ref.watch(settingsViewModelProvider);
-                final user = settingsState.currentUser;
                 final isLoadingUser = settingsState.isLoadingUser;
                 return SizedBox(
                   width: double.infinity,
@@ -89,7 +59,7 @@ class SettingsView extends ConsumerWidget {
                                               'assets/images/default_profile_black.png',
                                             )
                                             as ImageProvider,
-                                  child: state.isUpdatingProfile
+                                  child: settingsState.isUpdatingProfile
                                       ? Container(
                                           decoration: BoxDecoration(
                                             color: Colors.black.withValues(
@@ -179,6 +149,8 @@ class SettingsView extends ConsumerWidget {
                   ),
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(child: Text('Error: $error')),
             ),
             const SizedBox(height: 20),
             GestureDetector(
@@ -294,7 +266,9 @@ class SettingsView extends ConsumerWidget {
               ),
               onPressed: state.isSigningOut
                   ? null
-                  : () => viewModel.signOut(context),
+                  : () => ref
+                        .read(settingsViewModelProvider.notifier)
+                        .signOut(context),
               child: state.isSigningOut
                   ? const SizedBox(
                       height: 20,
@@ -324,7 +298,9 @@ class SettingsView extends ConsumerWidget {
               ),
               onPressed: state.isDeletingAccount
                   ? null
-                  : () => viewModel.deleteAccount(context),
+                  : () => ref
+                        .read(settingsViewModelProvider.notifier)
+                        .deleteAccount(context),
               child: state.isDeletingAccount
                   ? const SizedBox(
                       height: 20,

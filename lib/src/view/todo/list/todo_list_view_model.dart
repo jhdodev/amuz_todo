@@ -10,26 +10,7 @@ final authServiceProvider = Provider<AuthService>((ref) {
 class TodoListViewModel extends StateNotifier<TodoListViewState> {
   final AuthService _authService;
 
-  TodoListViewModel(this._authService) : super(const TodoListViewState()) {
-    _loadCurrentUser();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    state = state.copyWith(status: TodoListViewStatus.loading);
-
-    try {
-      final user = await _authService.getCurrentUserProfile();
-      state = state.copyWith(
-        status: TodoListViewStatus.success,
-        currentUser: user,
-      );
-    } catch (e) {
-      state = state.copyWith(
-        status: TodoListViewStatus.error,
-        errorMessage: e.toString(),
-      );
-    }
-  }
+  TodoListViewModel(this._authService) : super(const TodoListViewState());
 }
 
 final todoListViewModelProvider =
