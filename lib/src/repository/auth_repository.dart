@@ -95,6 +95,31 @@ class AuthRepository {
     }
   }
 
+  Future<void> reauthenticateUser(String currentPassword) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user?.email == null) {
+        throw Exception('사용자 정보를 찾을 수 없습니다.');
+      }
+
+      // 현재 이메일과 비밀번호로 재로그인 시도
+      await _supabase.auth.signInWithPassword(
+        email: user!.email!,
+        password: currentPassword,
+      );
+    } on AuthException catch (e) {
+      throw Exception('현재 비밀번호가 올바르지 않습니다: ${e.message}');
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+    } on AuthException catch (e) {
+      throw Exception('비밀번호 변경에 실패했습니다: ${e.message}');
+    }
+  }
+
   Future<void> deleteUserProfile(String userId) async {
     try {
       print('🔥 AuthRepository: Edge Function으로 계정 삭제 시작 - userId: $userId');

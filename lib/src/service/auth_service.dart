@@ -207,6 +207,28 @@ class AuthService {
     }
   }
 
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      print('🔥 AuthService: changePassword 시작');
+
+      // 현재 비밀번호로 재인증
+      await _authRepository.reauthenticateUser(currentPassword);
+      print('🔥 AuthService: 재인증 완료');
+
+      // 새 비밀번호로 업데이트
+      await _authRepository.updatePassword(newPassword);
+      print('🔥 AuthService: 비밀번호 업데이트 완료');
+
+      print('🔥 AuthService: changePassword 완료');
+    } catch (e) {
+      print('🔥 AuthService: changePassword 에러: $e');
+      throw Exception('비밀번호 변경 오류: $e');
+    }
+  }
+
   Future<void> deleteAccount() async {
     final authUser = currentAuthUser;
     if (authUser == null) {

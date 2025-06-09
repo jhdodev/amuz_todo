@@ -1,4 +1,5 @@
 import 'package:amuz_todo/src/view/settings/name/edit_name_view.dart';
+import 'package:amuz_todo/src/view/settings/password/change_password_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -205,27 +206,52 @@ class SettingsView extends ConsumerWidget {
                 ),
               ),
             ),
+
+            /// 비밀번호 변경 버튼
             GestureDetector(
-              onTap: () {},
-              child: Card(
-                color: Colors.white,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.grey.shade200, width: 1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  child: Row(
-                    children: [
-                      Text(
-                        '비밀번호 변경',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+              onTap: () async {
+                currentUserAsync.when(
+                  data: (user) async {
+                    if (user != null) {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ChangePasswordView(),
                         ),
+                      );
+                    }
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) {
+                    // 에러 시 스낵바 표시
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('사용자 정보를 불러올 수 없습니다: $error'),
+                        backgroundColor: Colors.red,
                       ),
-                    ],
+                    );
+                  },
+                );
+              },
+              child: SizedBox(
+                width: double.infinity,
+                child: Card(
+                  color: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.grey.shade200, width: 1),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    child: Text(
+                      '비밀번호 변경',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
               ),
