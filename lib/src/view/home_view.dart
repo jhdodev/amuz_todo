@@ -1,6 +1,6 @@
 import 'package:amuz_todo/theme/component/bottom_bar.dart';
 import 'package:amuz_todo/src/view/settings/settings_view.dart';
-import 'package:amuz_todo/src/view/todo/todo_list_view.dart';
+import 'package:amuz_todo/src/view/todo/list/todo_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

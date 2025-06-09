@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -32,18 +33,29 @@ class TodoListView extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 20),
-            child: Row(
-              children: [
-                ClipOval(
-                  child: Image.asset(
-                    'assets/images/default_profile_black.png',
-                    width: 28,
-                    height: 28,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text('amuz', style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
+            child: Consumer(
+              builder: (context, ref, child) {
+                final todoListState = ref.watch(todoListViewModelProvider);
+                final user = todoListState.currentUser;
+
+                return Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundImage: user?.profileImageUrl != null
+                          ? NetworkImage(user!.profileImageUrl!)
+                          : AssetImage(
+                              'assets/images/default_profile_black.png',
+                            ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      user?.name ?? 'default',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],

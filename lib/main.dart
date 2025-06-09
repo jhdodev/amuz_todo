@@ -1,8 +1,8 @@
-import 'package:amuz_todo/src/view/todo/todo_add_view.dart';
+import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
 import 'package:amuz_todo/src/view/home_view.dart';
 import 'package:amuz_todo/src/view/auth/signin/sign_in_view.dart';
 import 'package:amuz_todo/src/view/auth/signup/sign_up_view.dart';
-import 'package:amuz_todo/src/view/todo/todo_detail_view.dart';
+import 'package:amuz_todo/src/view/todo/detail/todo_detail_view.dart';
 import 'package:amuz_todo/util/route_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
