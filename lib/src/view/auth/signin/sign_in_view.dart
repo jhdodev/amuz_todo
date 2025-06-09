@@ -27,7 +27,7 @@ class _SignInViewState extends ConsumerState<SignInView> {
     final viewModel = ref.watch(signInViewModelProvider);
 
     ref.listen(signInViewModelProvider, (previous, next) {
-      if (next.isSignInSuccessful) {
+      if (previous?.isSignInSuccessful != true && next.isSignInSuccessful) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('로그인되었습니다!')));
