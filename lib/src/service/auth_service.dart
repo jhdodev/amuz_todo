@@ -19,7 +19,6 @@ class AuthService {
     try {
       print('🔥 AuthService: 회원가입 시작 - email: $email, name: $name');
 
-      // 1. Auth 회원가입
       print('🔥 AuthService: signUpAuth 호출 중...');
       final authUser = await _authRepository.signUpAuth(
         email: email,
@@ -27,7 +26,6 @@ class AuthService {
       );
       print('🔥 AuthService: signUpAuth 성공 - userId: ${authUser.id}');
 
-      // 2. 사용자 프로필 객체 생성
       print('🔥 AuthService: User 프로필 객체 생성 중...');
       final userProfile = app_user.User(
         id: authUser.id,
@@ -39,7 +37,6 @@ class AuthService {
       );
       print('🔥 AuthService: User 프로필 객체 생성 완료');
 
-      // 3. 프로필 저장
       print('🔥 AuthService: createUserProfile 호출 중...');
       final result = await _authRepository.createUserProfile(userProfile);
       print('🔥 AuthService: createUserProfile 성공');
@@ -134,6 +131,38 @@ class AuthService {
     } catch (e) {
       print('🔥 AuthService: updateProfile 에러: $e');
       throw Exception('프로필 업데이트 오류: $e');
+    }
+  }
+
+  Future<app_user.User> updateProfileImageToNull({
+    required String userId,
+  }) async {
+    try {
+      print('🔥 AuthService: updateProfileImageToNull 시작 - userId: $userId');
+
+      final currentProfile = await _authRepository.getUserProfile(userId);
+      print('🔥 AuthService: 현재 프로필 조회 완료');
+
+      final updatedProfile = app_user.User(
+        id: currentProfile.id,
+        email: currentProfile.email,
+        name: currentProfile.name,
+        profileImageUrl: null,
+        createdAt: currentProfile.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      print('🔥 AuthService: null로 설정된 프로필 생성 완료');
+      print(
+        '🔥 AuthService: profileImageUrl: ${updatedProfile.profileImageUrl}',
+      );
+
+      final result = await _authRepository.updateUserProfile(updatedProfile);
+      print('🔥 AuthService: updateProfileImageToNull 완료');
+      return result;
+    } catch (e) {
+      print('🔥 AuthService: updateProfileImageToNull 에러: $e');
+      throw Exception('프로필 이미지 제거 오류: $e');
     }
   }
 

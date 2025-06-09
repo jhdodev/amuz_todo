@@ -42,6 +42,7 @@ class User {
     String? email,
     String? name,
     String? profileImageUrl,
+    bool? clearProfileImage,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {

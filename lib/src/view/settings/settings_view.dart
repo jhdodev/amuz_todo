@@ -1,11 +1,12 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/repository/auth_repository.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_model.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_state.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-// Provider들
 final authServiceProvider = Provider<AuthService>((ref) {
   return AuthService(AuthRepository());
 });
@@ -55,44 +56,129 @@ class SettingsView extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: Card(
-                color: Colors.white,
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.grey.shade200, width: 1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ClipOval(
-                        child: Image.asset(
-                          'assets/images/default_profile_black.png',
-                          width: 80,
-                          height: 80,
-                        ),
+            Consumer(
+              builder: (context, ref, child) {
+                final settingsState = ref.watch(settingsViewModelProvider);
+                final user = settingsState.currentUser;
+                final isLoadingUser = settingsState.isLoadingUser;
+                return SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    color: Colors.white,
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.grey.shade200, width: 1),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Stack(
+                            children: [
+                              // 프로필 이미지
+                              GestureDetector(
+                                onTap: () => _showImagePicker(context, ref),
+                                child: CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: Colors.grey.shade300,
+                                  backgroundImage: user?.profileImageUrl != null
+                                      ? NetworkImage(user!.profileImageUrl!)
+                                      : const AssetImage(
+                                              'assets/images/default_profile_black.png',
+                                            )
+                                            as ImageProvider,
+                                  child: state.isUpdatingProfile
+                                      ? Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () => _showImagePicker(context, ref),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      LucideIcons.camera,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          if (isLoadingUser)
+                            Container(
+                              width: 80,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            )
+                          else
+                            Text(
+                              user?.name ?? 'default',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                          const SizedBox(height: 4),
+
+                          if (isLoadingUser)
+                            Container(
+                              width: 120,
+                              height: 16,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            )
+                          else
+                            Text(
+                              user?.email ?? 'default@example.com',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        '이름',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '이메일',
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             GestureDetector(
@@ -258,6 +344,54 @@ class SettingsView extends ConsumerWidget {
                     ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showImagePicker(BuildContext context, WidgetRef ref) {
+    final user = ref.read(settingsViewModelProvider).currentUser;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '프로필 사진 변경',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          // 갤러리에서 사진 선택
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref
+                  .read(settingsViewModelProvider.notifier)
+                  .pickImageFromGallery();
+            },
+            child: Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
+          ),
+
+          // 기본 이미지로 변경
+          if (user?.profileImageUrl != null)
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                ref
+                    .read(settingsViewModelProvider.notifier)
+                    .removeProfileImage();
+              },
+              child: const Text(
+                '기본 이미지로 변경',
+                style: TextStyle(fontSize: 16, color: Colors.red),
+              ),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            '취소',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
     );
