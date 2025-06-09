@@ -379,7 +379,12 @@ class SettingsView extends ConsumerWidget {
   }
 
   void _showImagePicker(BuildContext context, WidgetRef ref) {
-    final user = ref.read(settingsViewModelProvider).currentUser;
+    final currentUserAsync = ref.read(currentUserProvider);
+    final user = currentUserAsync.when(
+      data: (user) => user,
+      loading: () => null,
+      error: (error, stack) => null,
+    );
 
     showCupertinoModalPopup(
       context: context,

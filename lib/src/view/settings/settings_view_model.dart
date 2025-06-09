@@ -52,6 +52,8 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
       final authService = _ref.read(authServiceProvider);
       await authService.updateProfileImage(imageUrl);
 
+      _ref.invalidate(currentUserProvider);
+
       state = state.copyWith(isUpdatingProfile: false);
       print('🔥 SettingsViewModel: 프로필 이미지 업데이트 완료');
     } catch (e) {
@@ -66,7 +68,16 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
   Future<String> _uploadToSupabaseStorage(String imagePath) async {
     try {
       final file = File(imagePath);
-      final userId = state.currentUser!.id;
+
+      // AuthService에서 현재 사용자 정보 가져오기
+      final authService = _ref.read(authServiceProvider);
+      final currentUser = authService.currentAuthUser;
+
+      if (currentUser == null) {
+        throw Exception('로그인이 필요합니다');
+      }
+
+      final userId = currentUser.id;
       final fileName =
           'profile_${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final filePath = 'profiles/$fileName';
@@ -104,6 +115,9 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
 
       final authService = _ref.read(authServiceProvider);
       await authService.updateProfileImageToNull();
+
+      // 사용자 정보 새로고침하여 UI에 반영
+      _ref.invalidate(currentUserProvider);
 
       state = state.copyWith(isUpdatingProfile: false);
       print('🔥 SettingsViewModel: 기본 이미지로 변경 완료');
