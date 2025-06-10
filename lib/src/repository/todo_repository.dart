@@ -1,1 +1,136 @@
-// Todo Repository
+import 'package:amuz_todo/src/model/tag.dart';
+import 'package:amuz_todo/src/model/todo.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class TodoRepository {
+  final SupabaseClient _supabase = Supabase.instance.client;
+
+  Future<List<Todo>> getTodos() async {
+    try {
+      final todosResponse = await _supabase
+          .from('todos')
+          .select()
+          .eq('user_id', _supabase.auth.currentUser!.id)
+          .order('created_at', ascending: false);
+
+      List<Todo> todos = [];
+      for (var todoJson in todosResponse) {
+        final todo = Todo.fromJson(todoJson);
+        final tags = await _getTagsForTodo(todo.id);
+        todos.add(todo.copyWith(tags: tags));
+      }
+
+      return todos;
+    } catch (e) {
+      throw Exception('Todo 목록을 가져오는데 실패했습니다: $e');
+    }
+  }
+
+  // 특정 todo의 태그 목록 가져오기
+  Future<List<Tag>> _getTagsForTodo(String todoId) async {
+    try {
+      final response = await _supabase
+          .from('todo_tags')
+          .select('tags(*)')
+          .eq('todo_id', todoId);
+
+      return response
+          .map((item) => Tag.fromJson(item['tags']))
+          .cast<Tag>()
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Todo 생성
+  Future<Todo> createTodo({
+    required String title,
+    String? description,
+    String? imageUrl,
+    List<String> tagNames = const [],
+  }) async {
+    try {
+      final userId = _supabase.auth.currentUser!.id;
+
+      final todoResponse = await _supabase
+          .from('todos')
+          .insert({
+            'title': title,
+            'description': description,
+            'image_url': imageUrl,
+            'user_id': userId,
+          })
+          .select()
+          .single();
+
+      final todo = Todo.fromJson(todoResponse);
+
+      List<Tag> tags = [];
+      if (tagNames.isNotEmpty) {
+        tags = await _processTagsAndLink(todo.id, tagNames);
+      }
+
+      return todo.copyWith(tags: tags);
+    } catch (e) {
+      throw Exception('Todo 생성에 실패했습니다: $e');
+    }
+  }
+
+  // 태그 처리 및 Todo와 연결
+  Future<List<Tag>> _processTagsAndLink(
+    String todoId,
+    List<String> tagNames,
+  ) async {
+    List<Tag> resultTags = [];
+    final userId = _supabase.auth.currentUser!.id;
+
+    for (String tagName in tagNames) {
+      // 기존 태그 확인
+      final existingTagResponse = await _supabase
+          .from('tags')
+          .select()
+          .eq('name', tagName)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      Tag tag;
+      if (existingTagResponse == null) {
+        // 새 태그 생성
+        final newTagResponse = await _supabase
+            .from('tags')
+            .insert({'name': tagName, 'user_id': userId})
+            .select()
+            .single();
+        tag = Tag.fromJson(newTagResponse);
+      } else {
+        tag = Tag.fromJson(existingTagResponse);
+      }
+
+      // Todo와 태그 연결
+      await _supabase.from('todo_tags').insert({
+        'todo_id': todoId,
+        'tag_id': tag.id,
+      });
+
+      resultTags.add(tag);
+    }
+
+    return resultTags;
+  }
+
+  // 사용자의 모든 태그 가져오기
+  Future<List<Tag>> getUserTags() async {
+    try {
+      final response = await _supabase
+          .from('tags')
+          .select()
+          .eq('user_id', _supabase.auth.currentUser!.id)
+          .order('name');
+
+      return response.map((json) => Tag.fromJson(json)).cast<Tag>().toList();
+    } catch (e) {
+      throw Exception('태그 목록을 가져오는데 실패했습니다: $e');
+    }
+  }
+}
