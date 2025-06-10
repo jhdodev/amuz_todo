@@ -324,6 +324,12 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   controller: _tagController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
+                    prefixText: '#',
+                    prefixStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: "태그를 입력해주세요.",
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -463,7 +469,7 @@ Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
         border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
       child: Text(
-        tag,
+        '#$tag',
         style: TextStyle(
           color: isSelected ? Colors.white : Colors.black,
           fontWeight: FontWeight.w500,

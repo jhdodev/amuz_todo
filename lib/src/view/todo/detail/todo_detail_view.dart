@@ -414,7 +414,7 @@ Widget _buildTag(String tag) {
       border: Border.all(color: Colors.grey.shade300, width: 1),
     ),
     child: Text(
-      tag,
+      '#$tag',
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.w500,
