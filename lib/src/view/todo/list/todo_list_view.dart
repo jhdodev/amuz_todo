@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
+import 'package:amuz_todo/src/view/todo/detail/todo_detail_view.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_state.dart';
 import 'package:flutter/material.dart';
@@ -167,6 +168,22 @@ class TodoListView extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: ListTile(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        TodoDetailView(todoId: todo.id),
+                                  ),
+                                );
+
+                                // 상세 페이지에서 돌아왔을 때 목록 새로고침
+                                if (result == true) {
+                                  ref
+                                      .read(todoListViewModelProvider.notifier)
+                                      .refreshTodos();
+                                }
+                              },
                               leading: Transform.scale(
                                 scale: 1.2,
                                 child: Checkbox(

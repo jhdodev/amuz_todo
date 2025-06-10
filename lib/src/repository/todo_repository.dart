@@ -128,4 +128,71 @@ class TodoRepository {
       throw Exception('태그 목록을 가져오는데 실패했습니다: $e');
     }
   }
+
+  // 특정 Todo 가져오기
+  Future<Todo> getTodoById(String todoId) async {
+    try {
+      final todoResponse = await _supabase
+          .from('todos')
+          .select()
+          .eq('id', todoId)
+          .eq('user_id', _supabase.auth.currentUser!.id)
+          .single();
+
+      final todo = Todo.fromJson(todoResponse);
+      final tags = await _getTagsForTodo(todo.id);
+      return todo.copyWith(tags: tags);
+    } catch (e) {
+      throw Exception('Todo를 가져오는데 실패했습니다: $e');
+    }
+  }
+
+  // Todo 업데이트
+  Future<void> updateTodo({
+    required String todoId,
+    required String title,
+    String? description,
+    String? imageUrl,
+  }) async {
+    try {
+      await _supabase
+          .from('todos')
+          .update({
+            'title': title,
+            'description': description,
+            'image_url': imageUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', todoId)
+          .eq('user_id', _supabase.auth.currentUser!.id);
+    } catch (e) {
+      throw Exception('Todo 업데이트에 실패했습니다: $e');
+    }
+  }
+
+  // Todo의 모든 태그 연결 해제
+  Future<void> unlinkTodoFromAllTags(String todoId) async {
+    try {
+      await _supabase.from('todo_tags').delete().eq('todo_id', todoId);
+    } catch (e) {
+      throw Exception('Todo 태그 연결 해제에 실패했습니다: $e');
+    }
+  }
+
+  // odo 삭제
+  Future<void> deleteTodo(String todoId) async {
+    try {
+      // 먼저 태그 연결 해제
+      await unlinkTodoFromAllTags(todoId);
+
+      // Todo 삭제
+      await _supabase
+          .from('todos')
+          .delete()
+          .eq('id', todoId)
+          .eq('user_id', _supabase.auth.currentUser!.id);
+    } catch (e) {
+      throw Exception('Todo 삭제에 실패했습니다: $e');
+    }
+  }
 }

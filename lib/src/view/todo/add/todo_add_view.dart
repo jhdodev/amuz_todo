@@ -98,6 +98,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                        color: Colors.red,
                       ),
                     ),
                     CupertinoButton(

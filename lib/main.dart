@@ -48,7 +48,6 @@ class MyApp extends StatelessWidget {
         RoutePath.signIn: (context) => const SignInView(),
         RoutePath.home: (context) => const HomeView(),
         RoutePath.todoAdd: (context) => const TodoAddView(),
-        RoutePath.todoDetail: (context) => const TodoDetailView(),
         RoutePath.signUp: (context) => const SignUpView(),
       },
     );

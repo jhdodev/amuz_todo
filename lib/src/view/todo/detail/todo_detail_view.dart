@@ -1,10 +1,14 @@
+import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_model.dart';
+import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 class TodoDetailView extends ConsumerStatefulWidget {
-  const TodoDetailView({super.key});
+  const TodoDetailView({super.key, required this.todoId});
+
+  final String todoId;
 
   @override
   ConsumerState<TodoDetailView> createState() => _TodoDetailViewState();
@@ -13,6 +17,29 @@ class TodoDetailView extends ConsumerStatefulWidget {
 class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   String selectedPriority = '중요도 보통';
   DateTime selectedDate = DateTime.now();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _tagController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // ViewModel에서 todo 데이터 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .loadTodo(widget.todoId);
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _tagController.dispose();
+    super.dispose();
+  }
 
   void _showPrioritySelector(BuildContext context) {
     showCupertinoModalPopup(
@@ -92,6 +119,8 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                        color: Colors.red,
                       ),
                     ),
                     CupertinoButton(
@@ -127,24 +156,67 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          '(할 일 제목)',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        title: Consumer(
+          builder: (context, ref, child) {
+            final detailState = ref.watch(
+              todoDetailViewModelProvider(widget.todoId),
+            );
+
+            return Text(
+              detailState.todo?.title ?? '',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            );
+          },
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         actions: [
-          TextButton(
-            onPressed: () => {},
-            child: const Text(
-              '수정',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final detailState = ref.watch(
+                todoDetailViewModelProvider(widget.todoId),
+              );
+
+              return TextButton(
+                onPressed: detailState.status == TodoDetailViewStatus.updating
+                    ? null
+                    : () async {
+                        final success = await ref
+                            .read(
+                              todoDetailViewModelProvider(
+                                widget.todoId,
+                              ).notifier,
+                            )
+                            .updateTodo(
+                              title: _titleController.text,
+                              description: _descriptionController.text,
+                            );
+
+                        if (success && mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('수정이 완료되었습니다.')),
+                          );
+                          // 수정 완료 후 리스트 화면으로 돌아가기
+                          Navigator.pop(context, true);
+                        }
+                      },
+                child: detailState.status == TodoDetailViewStatus.updating
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        '수정',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              );
+            },
           ),
         ],
       ),
@@ -163,29 +235,44 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                TextField(
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: "할 일을 입력해주세요.",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                Consumer(
+                  builder: (context, ref, child) {
+                    final detailState = ref.watch(
+                      todoDetailViewModelProvider(widget.todoId),
+                    );
+
+                    // todo 데이터 로드되면 컨트롤러에 값 설정
+                    if (detailState.todo != null &&
+                        _titleController.text.isEmpty) {
+                      _titleController.text = detailState.todo!.title;
+                    }
+
+                    return TextField(
+                      controller: _titleController,
+                      cursorColor: Colors.black,
+                      decoration: InputDecoration(
+                        hintText: "할 일을 입력해주세요.",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            width: 3,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        width: 3,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 Align(
@@ -199,29 +286,45 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        cursorColor: Colors.black,
-                        decoration: InputDecoration(
-                          hintText: "설명을 입력해주세요.",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: Colors.grey.shade300,
-                              width: 2,
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final detailState = ref.watch(
+                            todoDetailViewModelProvider(widget.todoId),
+                          );
+
+                          // todo 데이터 로드되면 컨트롤러에 값 설정
+                          if (detailState.todo != null &&
+                              _descriptionController.text.isEmpty) {
+                            _descriptionController.text =
+                                detailState.todo!.description ?? '';
+                          }
+
+                          return TextField(
+                            controller: _descriptionController,
+                            cursorColor: Colors.black,
+                            decoration: InputDecoration(
+                              hintText: "설명을 입력해주세요.",
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                  width: 2,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(
+                                  color: Colors.black.withValues(alpha: 0.4),
+                                  width: 3,
+                                ),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.4),
-                              width: 3,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -256,37 +359,67 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: 50,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildTag('#개발'),
-                        const SizedBox(width: 10),
-                        _buildTag('#집안일'),
-                        const SizedBox(width: 10),
-                        _buildTag('쇼핑'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                      ],
-                    ),
-                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final detailState = ref.watch(
+                      todoDetailViewModelProvider(widget.todoId),
+                    );
+
+                    return SizedBox(
+                      height: 50,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ...detailState.availableTags.map(
+                              (tag) => Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: _buildTag(
+                                  tag.name,
+                                  isSelected: detailState.selectedTags.any(
+                                    (t) => t.name == tag.name,
+                                  ),
+                                  onTap: () => ref
+                                      .read(
+                                        todoDetailViewModelProvider(
+                                          widget.todoId,
+                                        ).notifier,
+                                      )
+                                      .toggleTag(tag),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  controller: _tagController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
+                    prefixText: '#',
+                    prefixStyle: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: "태그를 입력해주세요.",
                     suffixIcon: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (_tagController.text.trim().isNotEmpty) {
+                          ref
+                              .read(
+                                todoDetailViewModelProvider(
+                                  widget.todoId,
+                                ).notifier,
+                              )
+                              .addNewTag(_tagController.text);
+                          _tagController.clear();
+                        }
+                      },
                       icon: const Icon(LucideIcons.plus),
                     ),
                     border: OutlineInputBorder(
@@ -385,16 +518,80 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextButton(
-                  onPressed: () => {},
-                  child: const Text(
-                    '삭제',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final detailState = ref.watch(
+                      todoDetailViewModelProvider(widget.todoId),
+                    );
+
+                    return TextButton(
+                      onPressed:
+                          detailState.status == TodoDetailViewStatus.deleting
+                          ? null
+                          : () async {
+                              // 삭제 확인 다이얼로그
+                              final shouldDelete =
+                                  await showCupertinoDialog<bool>(
+                                    context: context,
+                                    builder: (context) => CupertinoAlertDialog(
+                                      title: const Text('할 일 삭제'),
+                                      content: const Text(
+                                        '이 할 일을 삭제하시겠습니까?\n삭제 후에는 복구가 불가능합니다.',
+                                      ),
+                                      actions: [
+                                        CupertinoDialogAction(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text('취소'),
+                                        ),
+                                        CupertinoDialogAction(
+                                          isDestructiveAction: true,
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text('삭제'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                              if (shouldDelete == true) {
+                                final success = await ref
+                                    .read(
+                                      todoDetailViewModelProvider(
+                                        widget.todoId,
+                                      ).notifier,
+                                    )
+                                    .deleteTodo();
+
+                                if (success && mounted) {
+                                  Navigator.pop(
+                                    context,
+                                    true,
+                                  ); // 삭제 성공 시 이전 화면으로 돌아가기
+                                }
+                              }
+                            },
+                      child: detailState.status == TodoDetailViewStatus.deleting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.red,
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              '삭제',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -405,20 +602,23 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   }
 }
 
-Widget _buildTag(String tag) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-    decoration: BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.grey.shade300, width: 1),
-    ),
-    child: Text(
-      '#$tag',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w500,
-        fontSize: 16,
+Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Text(
+        '#$tag',
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.black,
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
       ),
     ),
   );
