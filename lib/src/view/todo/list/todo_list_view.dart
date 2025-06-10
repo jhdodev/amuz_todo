@@ -103,13 +103,19 @@ class TodoListView extends ConsumerWidget {
                     const SizedBox(width: 10),
                     _buildFilterButton('완료', selectedFilter, ref),
                     const SizedBox(width: 10),
-                    _buildFilterButton('#개발', selectedFilter, ref),
-                    const SizedBox(width: 10),
-                    _buildFilterButton('#집안일', selectedFilter, ref),
-                    const SizedBox(width: 10),
-                    _buildFilterButton('#쇼핑', selectedFilter, ref),
-                    const SizedBox(width: 10),
-                    _buildFilterButton('#기타', selectedFilter, ref),
+                    // 동적으로 태그 필터 버튼들 생성
+                    ...todoListState.userTags
+                        .map(
+                          (tag) => [
+                            _buildFilterButton(
+                              '#${tag.name}',
+                              selectedFilter,
+                              ref,
+                            ),
+                            const SizedBox(width: 10),
+                          ],
+                        )
+                        .expand((element) => element),
                   ],
                 ),
               ),
@@ -204,6 +210,42 @@ class TodoListView extends ConsumerWidget {
                                             : TextDecoration.none,
                                       ),
                                     ),
+                                  // 태그 표시
+                                  if (todo.tags.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      children: todo.tags
+                                          .map(
+                                            (tag) => Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                border: Border.all(
+                                                  color: Colors.grey[300]!,
+                                                  width: 0.5,
+                                                ),
+                                              ),
+                                              child: Text(
+                                                '#${tag.name}',
+                                                style: TextStyle(
+                                                  color: Colors.grey[700],
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ],
                                 ],
                               ),
                               contentPadding: const EdgeInsets.symmetric(
