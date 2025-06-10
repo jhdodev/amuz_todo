@@ -277,7 +277,9 @@ class TodoListView extends ConsumerWidget {
                               ),
                               trailing: IconButton(
                                 onPressed: () {
-                                  // TODO: 삭제 기능 추가 필요
+                                  ref
+                                      .read(todoListViewModelProvider.notifier)
+                                      .deleteTodo(todo.id);
                                 },
                                 icon: Icon(
                                   LucideIcons.trash2,

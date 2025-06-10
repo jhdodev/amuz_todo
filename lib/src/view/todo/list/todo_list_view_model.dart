@@ -100,6 +100,24 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
       );
     }
   }
+
+  // Todo 삭제
+  Future<void> deleteTodo(String todoId) async {
+    try {
+      await _todoRepository.deleteTodo(todoId);
+
+      final updatedTodos = state.todos
+          .where((todo) => todo.id != todoId)
+          .toList();
+
+      state = state.copyWith(todos: updatedTodos);
+    } catch (e) {
+      state = state.copyWith(
+        status: TodoListViewStatus.error,
+        errorMessage: e.toString(),
+      );
+    }
+  }
 }
 
 final todoListViewModelProvider =
