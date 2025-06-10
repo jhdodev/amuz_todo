@@ -1,4 +1,6 @@
 import 'package:amuz_todo/src/service/auth_service.dart';
+import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
+import 'package:amuz_todo/src/view/todo/list/todo_list_view_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -13,6 +15,7 @@ class TodoListView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFilter = ref.watch(filterProvider);
     final currentUserAsync = ref.watch(currentUserProvider);
+    final todoListState = ref.watch(todoListViewModelProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,15 +63,20 @@ class TodoListView extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           children: [
+            const SizedBox(height: 6),
             TextField(
               cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: "검색어를 입력하세요",
                 prefixIcon: const Icon(LucideIcons.search),
                 suffixIcon: const Icon(LucideIcons.x),
-                border: OutlineInputBorder(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
+                  borderSide: BorderSide(color: Color(0xFFE5E5E5), width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -108,74 +116,114 @@ class TodoListView extends ConsumerWidget {
             const SizedBox(height: 20),
 
             Expanded(
-              child: ListView.builder(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  final isCompleted = false;
+              child: todoListState.status == TodoListViewStatus.loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : todoListState.status == TodoListViewStatus.error
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text('오류가 발생했습니다: ${todoListState.errorMessage}'),
+                          TextButton(
+                            onPressed: () => ref
+                                .read(todoListViewModelProvider.notifier)
+                                .loadInitialData(),
+                            child: const Text('다시 시도'),
+                          ),
+                        ],
+                      ),
+                    )
+                  : todoListState.todos.isEmpty
+                  ? const Center(
+                      child: Text(
+                        '아직 할 일이 없습니다.\n새로운 할 일을 추가해보세요!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: todoListState.todos.length,
+                      itemBuilder: (context, index) {
+                        final todo = todoListState.todos[index];
+                        final isCompleted = false; // TODO: 완료 기능 추가 필요
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.grey.shade200, width: 1),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: ListTile(
-                        leading: Transform.scale(
-                          scale: 1.2,
-                          child: Checkbox(
-                            value: isCompleted,
-                            activeColor: Colors.black,
-                            checkColor: Colors.white,
-                            side: BorderSide(
-                              color: Colors.grey.shade400,
-                              width: 1.0,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          child: Card(
+                            color: Colors.white,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                color: Colors.grey.shade200,
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            onChanged: (bool? value) {},
+                            child: ListTile(
+                              leading: Transform.scale(
+                                scale: 1.2,
+                                child: Checkbox(
+                                  value: isCompleted,
+                                  activeColor: Colors.black,
+                                  checkColor: Colors.white,
+                                  side: BorderSide(
+                                    color: Colors.grey.shade400,
+                                    width: 1.0,
+                                  ),
+                                  onChanged: (bool? value) {
+                                    // TODO: 완료 상태 기능 추가 필요
+                                  },
+                                ),
+                              ),
+                              title: Text(
+                                todo.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: isCompleted
+                                      ? Colors.grey[600]
+                                      : Colors.black,
+                                  decoration: isCompleted
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (todo.description != null &&
+                                      todo.description!.isNotEmpty)
+                                    Text(
+                                      todo.description!,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                        decoration: isCompleted
+                                            ? TextDecoration.lineThrough
+                                            : TextDecoration.none,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  // TODO: 삭제 기능 추가 필요
+                                },
+                                icon: Icon(
+                                  LucideIcons.trash2,
+                                  color: Colors.grey[700],
+                                  size: 20,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        title: Text(
-                          "할 일 $index",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: isCompleted
-                                ? Colors.grey[600]
-                                : Colors.black,
-                            decoration: isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        subtitle: Text(
-                          "할 일 $index에 대한 상세 설명입니다",
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                            decoration: isCompleted
-                                ? TextDecoration.lineThrough
-                                : TextDecoration.none,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        trailing: IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            LucideIcons.trash2,
-                            color: Colors.grey[700],
-                            size: 20,
-                          ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
