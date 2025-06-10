@@ -256,6 +256,7 @@ class SettingsView extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
             Card(
               color: Colors.white,
               elevation: 2,
