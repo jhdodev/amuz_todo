@@ -1,4 +1,5 @@
 import 'package:amuz_todo/src/service/auth_service.dart';
+import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_state.dart';
 import 'package:flutter/material.dart';
@@ -229,7 +230,17 @@ class TodoListView extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TodoAddView()),
+          );
+
+          // Todo 목록 새로고침
+          if (result == true) {
+            ref.read(todoListViewModelProvider.notifier).refreshTodos();
+          }
+        },
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         shape: CircleBorder(),

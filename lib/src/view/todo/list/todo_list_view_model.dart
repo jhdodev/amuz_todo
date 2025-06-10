@@ -64,14 +64,12 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     required String title,
     String? description,
     String? imageUrl,
-    List<String> tagNames = const [],
   }) async {
     try {
       await _todoRepository.createTodo(
         title: title,
         description: description,
         imageUrl: imageUrl,
-        tagNames: tagNames,
       );
 
       // 목록 새로고침

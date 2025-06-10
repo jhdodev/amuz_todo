@@ -1,3 +1,5 @@
+import 'package:amuz_todo/src/view/todo/add/todo_add_view_model.dart';
+import 'package:amuz_todo/src/view/todo/add/todo_add_view_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +15,10 @@ class TodoAddView extends ConsumerStatefulWidget {
 class _TodoAddViewState extends ConsumerState<TodoAddView> {
   String selectedPriority = '중요도 보통';
   DateTime selectedDate = DateTime.now();
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _tagController = TextEditingController();
 
   void _showPrioritySelector(BuildContext context) {
     showCupertinoModalPopup(
@@ -135,16 +141,41 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         actions: [
-          TextButton(
-            onPressed: () => {},
-            child: const Text(
-              '등록',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+          Consumer(
+            builder: (context, ref, child) {
+              final addState = ref.watch(todoAddViewModelProvider);
+
+              return TextButton(
+                onPressed: addState.status == TodoAddViewStatus.loading
+                    ? null
+                    : () async {
+                        final success = await ref
+                            .read(todoAddViewModelProvider.notifier)
+                            .saveTodo(
+                              title: _titleController.text,
+                              description: _descriptionController.text,
+                            );
+
+                        if (success && mounted) {
+                          Navigator.pop(context, true); // true를 반환해서 새로고침 신호
+                        }
+                      },
+                child: addState.status == TodoAddViewStatus.loading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(
+                        '등록',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              );
+            },
           ),
         ],
       ),
@@ -164,6 +195,7 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 ),
                 const SizedBox(height: 10),
                 TextField(
+                  controller: _titleController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
                     hintText: "할 일을 입력해주세요.",
@@ -200,6 +232,7 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: _descriptionController,
                         cursorColor: Colors.black,
                         decoration: InputDecoration(
                           hintText: "설명을 입력해주세요.",
@@ -256,37 +289,51 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: 50,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildTag('#개발'),
-                        const SizedBox(width: 10),
-                        _buildTag('#집안일'),
-                        const SizedBox(width: 10),
-                        _buildTag('쇼핑'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                        _buildTag('기타'),
-                        const SizedBox(width: 10),
-                      ],
-                    ),
-                  ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final addState = ref.watch(todoAddViewModelProvider);
+
+                    return SizedBox(
+                      height: 50,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ...addState.availableTags.map(
+                              (tag) => Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: _buildTag(
+                                  tag.name,
+                                  isSelected: addState.selectedTags.any(
+                                    (t) => t.name == tag.name,
+                                  ),
+                                  onTap: () => ref
+                                      .read(todoAddViewModelProvider.notifier)
+                                      .toggleTag(tag),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextField(
+                  controller: _tagController,
                   cursorColor: Colors.black,
                   decoration: InputDecoration(
                     hintText: "태그를 입력해주세요.",
                     suffixIcon: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (_tagController.text.trim().isNotEmpty) {
+                          ref
+                              .read(todoAddViewModelProvider.notifier)
+                              .addNewTag(_tagController.text);
+                          _tagController.clear();
+                        }
+                      },
                       icon: const Icon(LucideIcons.plus),
                     ),
                     border: OutlineInputBorder(
@@ -405,20 +452,23 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
   }
 }
 
-Widget _buildTag(String tag) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-    decoration: BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.circular(25),
-      border: Border.all(color: Colors.grey.shade300, width: 1),
-    ),
-    child: Text(
-      tag,
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.w500,
-        fontSize: 16,
+Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: isSelected ? Colors.black : Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Text(
+        tag,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.black,
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
       ),
     ),
   );
