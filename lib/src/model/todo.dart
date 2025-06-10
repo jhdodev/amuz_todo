@@ -9,6 +9,7 @@ class Todo {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String userId;
+  final bool isCompleted;
 
   const Todo({
     required this.id,
@@ -19,6 +20,7 @@ class Todo {
     required this.createdAt,
     required this.updatedAt,
     required this.userId,
+    required this.isCompleted,
   });
 
   factory Todo.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class Todo {
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       userId: json['user_id'] as String,
+      isCompleted: json['is_completed'] as bool,
     );
   }
 
@@ -43,6 +46,7 @@ class Todo {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'user_id': userId,
+      'is_completed': isCompleted,
     };
   }
 
@@ -55,6 +59,7 @@ class Todo {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? userId,
+    bool? isCompleted,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -65,6 +70,7 @@ class Todo {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 
@@ -79,6 +85,6 @@ class Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, createdAt: $createdAt)';
+    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, isCompleted: $isCompleted)';
   }
 }

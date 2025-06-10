@@ -179,7 +179,7 @@ class TodoRepository {
     }
   }
 
-  // odo 삭제
+  // Todo 삭제
   Future<void> deleteTodo(String todoId) async {
     try {
       // 먼저 태그 연결 해제
@@ -193,6 +193,22 @@ class TodoRepository {
           .eq('user_id', _supabase.auth.currentUser!.id);
     } catch (e) {
       throw Exception('Todo 삭제에 실패했습니다: $e');
+    }
+  }
+
+  // Todo 완료 상태 토글
+  Future<void> toggleTodoCompletion(String todoId, bool isCompleted) async {
+    try {
+      await _supabase
+          .from('todos')
+          .update({
+            'is_completed': isCompleted,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', todoId)
+          .eq('user_id', _supabase.auth.currentUser!.id);
+    } catch (e) {
+      throw Exception('Todo 완료 상태 변경에 실패했습니다: $e');
     }
   }
 }

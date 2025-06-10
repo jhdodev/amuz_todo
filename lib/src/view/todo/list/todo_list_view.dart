@@ -153,7 +153,7 @@ class TodoListView extends ConsumerWidget {
                       itemCount: todoListState.todos.length,
                       itemBuilder: (context, index) {
                         final todo = todoListState.todos[index];
-                        final isCompleted = false; // TODO: 완료 기능 추가 필요
+                        final isCompleted = todo.isCompleted;
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -195,7 +195,13 @@ class TodoListView extends ConsumerWidget {
                                     width: 1.0,
                                   ),
                                   onChanged: (bool? value) {
-                                    // TODO: 완료 상태 기능 추가 필요
+                                    if (value != null) {
+                                      ref
+                                          .read(
+                                            todoListViewModelProvider.notifier,
+                                          )
+                                          .toggleTodoCompletion(todo.id, value);
+                                    }
                                   },
                                 ),
                               ),
