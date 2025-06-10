@@ -82,13 +82,17 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     }
   }
 
-  // Todo 완료 상태 토글
   Future<void> toggleTodoCompletion(String todoId, bool isCompleted) async {
     try {
       await _todoRepository.toggleTodoCompletion(todoId, isCompleted);
 
-      // 목록 새로고침
-      await refreshTodos();
+      final updatedTodo = await _todoRepository.getTodoById(todoId);
+
+      final updatedTodos = state.todos.map((todo) {
+        return todo.id == todoId ? updatedTodo : todo;
+      }).toList();
+
+      state = state.copyWith(todos: updatedTodos);
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
