@@ -27,6 +27,18 @@ class AuthService {
           yield user;
         } catch (e) {
           print('🔥 AuthService: 사용자 정보 로딩 에러 - $e');
+
+          // refresh token 에러인 경우 자동 로그아웃
+          if (e.toString().contains('refresh_token_not_found') ||
+              e.toString().contains('Invalid Refresh Token')) {
+            print('🔥 AuthService: Refresh Token 에러 감지, 자동 로그아웃 수행');
+            try {
+              await signOut();
+            } catch (signOutError) {
+              print('🔥 AuthService: 자동 로그아웃 실패: $signOutError');
+            }
+          }
+
           yield null;
         }
       }

@@ -116,7 +116,6 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
       final authService = _ref.read(authServiceProvider);
       await authService.updateProfileImageToNull();
 
-      // 사용자 정보 새로고침하여 UI에 반영
       _ref.invalidate(currentUserProvider);
 
       state = state.copyWith(isUpdatingProfile: false);
