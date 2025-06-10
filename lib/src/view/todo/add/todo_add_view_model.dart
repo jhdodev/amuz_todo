@@ -123,7 +123,9 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
 }
 
 final todoAddViewModelProvider =
-    StateNotifierProvider<TodoAddViewModel, TodoAddViewState>((ref) {
+    StateNotifierProvider.autoDispose<TodoAddViewModel, TodoAddViewState>((
+      ref,
+    ) {
       final todoRepository = ref.watch(todoAddRepositoryProvider);
       return TodoAddViewModel(todoRepository);
     });
