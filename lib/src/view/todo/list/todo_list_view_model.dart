@@ -1,4 +1,5 @@
 import 'package:amuz_todo/src/model/priority.dart';
+import 'package:amuz_todo/src/model/todo.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/repository/auth_repository.dart';
@@ -41,7 +42,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
       );
 
       // 초기 필터링 적용
-      _applyFilters();
+      _applyFiltersAndSort();
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
@@ -55,7 +56,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     try {
       final todos = await _todoRepository.getTodos();
       state = state.copyWith(todos: todos);
-      _applyFilters(); // 새로고침 후 필터링 다시 적용
+      _applyFiltersAndSort(); // 새로고침 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
@@ -67,7 +68,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
   // 완료 상태 필터 변경
   void setCompletionFilter(String filter) {
     state = state.copyWith(completionFilter: filter);
-    _applyFilters();
+    _applyFiltersAndSort();
   }
 
   // 태그 필터 변경
@@ -79,12 +80,21 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
       newSelectedTags.add(tagName);
     }
     state = state.copyWith(selectedTags: newSelectedTags);
-    _applyFilters();
+    _applyFiltersAndSort();
   }
 
-  // 필터링 로직 (private 메서드)
-  void _applyFilters() {
+  // 필터링과 정렬 로직
+  void _applyFiltersAndSort() {
     final filteredTodos = state.todos.where((todo) {
+      // 검색어 필터링 (제목과 설명에서 검색) ← 이 부분 추가!
+      bool passesSearchFilter = true;
+      if (state.searchQuery.isNotEmpty) {
+        final query = state.searchQuery.toLowerCase();
+        passesSearchFilter =
+            todo.title.toLowerCase().contains(query) ||
+            (todo.description?.toLowerCase().contains(query) ?? false);
+      }
+
       // 완료 상태 필터링
       bool passesCompletionFilter = true;
       if (state.completionFilter == '완료') {
@@ -104,10 +114,44 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
         });
       }
 
-      return passesCompletionFilter && passesTagFilter;
+      return passesSearchFilter && passesCompletionFilter && passesTagFilter;
     }).toList();
 
+    // 정렬 적용
+    filteredTodos.sort((a, b) => _compareTodos(a, b, state.sortOption));
+
     state = state.copyWith(filteredTodos: filteredTodos);
+  }
+
+  // Todo 비교 함수 (정렬용)
+  int _compareTodos(Todo a, Todo b, SortOption sortOption) {
+    switch (sortOption) {
+      case SortOption.priorityHigh:
+        return _comparePriority(b.priority, a.priority);
+      case SortOption.priorityLow:
+        return _comparePriority(a.priority, b.priority);
+      case SortOption.dueDateEarly:
+        return _compareDueDate(a.dueDate, b.dueDate);
+      case SortOption.dueDateLate:
+        return _compareDueDate(b.dueDate, a.dueDate);
+      case SortOption.createdEarly:
+        return a.createdAt.compareTo(b.createdAt);
+      case SortOption.createdLate:
+        return b.createdAt.compareTo(a.createdAt);
+    }
+  }
+
+  // 우선순위 비교 (low=1, medium=2, high=3)
+  int _comparePriority(Priority a, Priority b) {
+    return a.value.compareTo(b.value);
+  }
+
+  // 마감일 비교
+  int _compareDueDate(DateTime? a, DateTime? b) {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1; // null은 뒤로
+    if (b == null) return -1; // null은 뒤로
+    return a.compareTo(b);
   }
 
   // 새 Todo 생성
@@ -145,7 +189,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
       }).toList();
 
       state = state.copyWith(todos: updatedTodos);
-      _applyFilters(); // 상태 변경 후 필터링 다시 적용
+      _applyFiltersAndSort(); // 상태 변경 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
@@ -164,13 +208,31 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
           .toList();
 
       state = state.copyWith(todos: updatedTodos);
-      _applyFilters(); // 삭제 후 필터링 다시 적용
+      _applyFiltersAndSort(); // 삭제 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
         errorMessage: e.toString(),
       );
     }
+  }
+
+  // 정렬 옵션 변경
+  void setSortOption(SortOption sortOption) {
+    state = state.copyWith(sortOption: sortOption);
+    _applyFiltersAndSort();
+  }
+
+  // 검색어 변경
+  void setSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+    _applyFiltersAndSort();
+  }
+
+  // 검색어 초기화
+  void clearSearch() {
+    state = state.copyWith(searchQuery: '');
+    _applyFiltersAndSort();
   }
 }
 

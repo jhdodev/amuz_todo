@@ -23,6 +23,7 @@ class TodoDetailViewState {
   final File? selectedImage;
   final bool isUploadingImage;
   final String? imageUrl;
+  final bool clearDueDate;
 
   const TodoDetailViewState({
     this.status = TodoDetailViewStatus.initial,
@@ -35,6 +36,7 @@ class TodoDetailViewState {
     this.selectedImage,
     this.isUploadingImage = false,
     this.imageUrl,
+    this.clearDueDate = false,
   });
 
   TodoDetailViewState copyWith({
@@ -48,7 +50,7 @@ class TodoDetailViewState {
     File? selectedImage,
     bool? isUploadingImage,
     String? imageUrl,
-    bool clearDueDate = false,
+    bool? clearDueDate,
   }) {
     return TodoDetailViewState(
       status: status ?? this.status,
@@ -56,9 +58,10 @@ class TodoDetailViewState {
       availableTags: availableTags ?? this.availableTags,
       selectedTags: selectedTags ?? this.selectedTags,
       selectedPriority: selectedPriority ?? this.selectedPriority,
-      selectedDueDate: clearDueDate
+      selectedDueDate: (clearDueDate == true)
           ? null
           : (selectedDueDate ?? this.selectedDueDate),
+      clearDueDate: clearDueDate ?? this.clearDueDate,
       errorMessage: errorMessage ?? this.errorMessage,
       selectedImage: selectedImage ?? this.selectedImage,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,

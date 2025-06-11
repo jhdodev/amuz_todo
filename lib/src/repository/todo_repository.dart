@@ -159,8 +159,8 @@ class TodoRepository {
     String? description,
     String? imageUrl,
     Priority? priority,
-    DateTime? dueDate, // 마감일 매개변수 추가
-    bool clearDueDate = false, // 마감일 삭제 옵션 추가
+    DateTime? dueDate,
+    bool clearDueDate = false,
   }) async {
     try {
       final updateData = {

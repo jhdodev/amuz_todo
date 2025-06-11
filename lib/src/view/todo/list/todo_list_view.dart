@@ -4,6 +4,7 @@ import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_state.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -29,7 +30,7 @@ class TodoListView extends ConsumerWidget {
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
           child: IconButton(
-            onPressed: () {},
+            onPressed: () => _showSortDialog(context, ref),
             icon: const Icon(LucideIcons.listFilter),
           ),
         ),
@@ -64,11 +65,19 @@ class TodoListView extends ConsumerWidget {
           children: [
             const SizedBox(height: 6),
             TextField(
+              onChanged: (value) => ref
+                  .read(todoListViewModelProvider.notifier)
+                  .setSearchQuery(value),
               cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: "검색어를 입력하세요",
                 prefixIcon: const Icon(LucideIcons.search),
-                suffixIcon: const Icon(LucideIcons.x),
+                suffixIcon: IconButton(
+                  onPressed: () => ref
+                      .read(todoListViewModelProvider.notifier)
+                      .clearSearch(),
+                  icon: const Icon(LucideIcons.x),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
@@ -470,5 +479,72 @@ class TodoListView extends ConsumerWidget {
   // 마감일 포맷팅
   String _formatDueDate(DateTime dueDate) {
     return '${dueDate.month}/${dueDate.day}';
+  }
+
+  // 정렬 옵션 선택 다이얼로그
+  void _showSortDialog(BuildContext context, WidgetRef ref) {
+    final currentSort = ref.read(todoListViewModelProvider).sortOption;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: Text(
+          '정렬 기준 선택',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        actions: SortOption.values.map((option) {
+          final isSelected = option == currentSort;
+          return CupertinoActionSheetAction(
+            onPressed: () {
+              ref
+                  .read(todoListViewModelProvider.notifier)
+                  .setSortOption(option);
+              Navigator.pop(context);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _getSortDisplayName(option),
+                  style: TextStyle(
+                    color: isSelected ? Colors.blue : Colors.black,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                  ),
+                ),
+                if (isSelected) ...[
+                  SizedBox(width: 8),
+                  Icon(LucideIcons.check, size: 16, color: Colors.blue),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          isDefaultAction: true,
+          child: Text('취소'),
+        ),
+      ),
+    );
+  }
+
+  // 정렬 옵션 이름 반환
+  String _getSortDisplayName(SortOption option) {
+    switch (option) {
+      case SortOption.priorityHigh:
+        return '우선순위 높은순';
+      case SortOption.priorityLow:
+        return '우선순위 낮은순';
+      case SortOption.dueDateEarly:
+        return '마감일 빠른순';
+      case SortOption.dueDateLate:
+        return '마감일 느린순';
+      case SortOption.createdEarly:
+        return '생성일 빠른순';
+      case SortOption.createdLate:
+        return '생성일 느린순';
+    }
   }
 }
