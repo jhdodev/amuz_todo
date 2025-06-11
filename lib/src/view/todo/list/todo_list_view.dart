@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view.dart';
@@ -233,42 +234,108 @@ class TodoListView extends ConsumerWidget {
                                             : TextDecoration.none,
                                       ),
                                     ),
-                                  // 태그 표시
-                                  if (todo.tags.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    Wrap(
-                                      spacing: 6,
-                                      runSpacing: 4,
-                                      children: todo.tags
-                                          .map(
-                                            (tag) => Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[100],
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                border: Border.all(
-                                                  color: Colors.grey[300]!,
-                                                  width: 0.5,
-                                                ),
-                                              ),
-                                              child: Text(
-                                                '#${tag.name}',
-                                                style: TextStyle(
-                                                  color: Colors.grey[700],
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
+                                  // 우선순위, 마감일, 태그를 함께 표시
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      // 우선순위
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _getPriorityColor(
+                                            todo.priority,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              LucideIcons.listOrdered,
+                                              size: 12,
+                                              color: Colors.white,
+                                            ),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              todo.priority.displayName,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                          )
-                                          .toList(),
-                                    ),
-                                  ],
+                                          ],
+                                        ),
+                                      ),
+                                      // 마감일
+                                      if (todo.dueDate != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue,
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                LucideIcons.calendarX,
+                                                size: 12,
+                                                color: Colors.white,
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                _formatDueDate(todo.dueDate!),
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      // 실제 태그들
+                                      ...todo.tags.map(
+                                        (tag) => Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey[300]!,
+                                              width: 0.5,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            '#${tag.name}',
+                                            style: TextStyle(
+                                              color: Colors.grey[700],
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               contentPadding: const EdgeInsets.symmetric(
@@ -344,5 +411,22 @@ class TodoListView extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  // 우선순위에 따른 색상 반환
+  Color _getPriorityColor(Priority priority) {
+    switch (priority) {
+      case Priority.high:
+        return Colors.red;
+      case Priority.medium:
+        return Colors.orange;
+      case Priority.low:
+        return Colors.green;
+    }
+  }
+
+  // 마감일 포맷팅
+  String _formatDueDate(DateTime dueDate) {
+    return '${dueDate.month}/${dueDate.day}';
   }
 }
