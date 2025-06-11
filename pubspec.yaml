@@ -15,6 +15,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
   lucide_icons: ^0.257.0
+  supabase_flutter: ^2.9.0
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  flutter_dotenv: ^5.2.1
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
@@ -27,6 +32,7 @@ flutter:
 
   assets:
     - assets/images/
+    - .env
 
   fonts:
     - family: Pretendard

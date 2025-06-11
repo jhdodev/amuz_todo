@@ -1,17 +1,17 @@
-import 'package:amuz_todo/common/bottom_bar.dart';
-import 'package:amuz_todo/settings_view.dart';
-import 'package:amuz_todo/todo_list_view.dart';
+import 'package:amuz_todo/theme/component/bottom_bar.dart';
+import 'package:amuz_todo/src/view/settings/settings_view.dart';
+import 'package:amuz_todo/src/view/todo/list/todo_list_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeViewState extends State<HomeView> {
   /// 현재 선택된 index
   int currentIndex = 0;
 

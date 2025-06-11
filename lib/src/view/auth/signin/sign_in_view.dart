@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'sign_in_view_model.dart';
 
-class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+class SignInView extends ConsumerStatefulWidget {
+  const SignInView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  ConsumerState<SignInView> createState() => _SignInViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _SignInViewState extends ConsumerState<SignInView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,6 +24,17 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = ref.watch(signInViewModelProvider);
+
+    ref.listen(signInViewModelProvider, (previous, next) {
+      if (previous?.isSignInSuccessful != true && next.isSignInSuccessful) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('로그인되었습니다!')));
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    });
+
     return Stack(
       children: [
         Scaffold(
@@ -35,7 +47,6 @@ class _LoginViewState extends State<LoginView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 로고 또는 타이틀
                     Center(
                       child: Text(
                         'amuz todo',
@@ -47,7 +58,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const SizedBox(height: 40),
 
-                    // 이메일 입력 필드
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -82,7 +92,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 비밀번호 입력 필드
                     TextFormField(
                       controller: _passwordController,
                       obscureText: true,
@@ -115,11 +124,39 @@ class _LoginViewState extends State<LoginView> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                    // 로그인 버튼
+                    if (viewModel.errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Text(
+                          viewModel.errorMessage!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: viewModel.isBusy
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                ref
+                                    .read(signInViewModelProvider.notifier)
+                                    .signIn(
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                    );
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -127,17 +164,27 @@ class _LoginViewState extends State<LoginView> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
-                        '로그인',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: viewModel.isBusy
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              '로그인',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
 
-                    // 회원가입 링크
+                    const SizedBox(height: 16),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -145,7 +192,7 @@ class _LoginViewState extends State<LoginView> {
                         const SizedBox(width: 10),
                         TextButton(
                           onPressed: () {
-                            // 회원가입 페이지로 이동
+                            Navigator.pushNamed(context, '/signUp');
                           },
                           child: const Text(
                             '회원가입',
@@ -164,11 +211,6 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
         ),
-        if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(child: CircularProgressIndicator()),
-          ),
       ],
     );
   }
