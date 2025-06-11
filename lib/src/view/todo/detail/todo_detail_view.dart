@@ -342,7 +342,7 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                           ),
                         ),
                         child: const Icon(
-                          Icons.add_photo_alternate_outlined,
+                          LucideIcons.imagePlus,
                           color: Colors.grey,
                           size: 30,
                         ),

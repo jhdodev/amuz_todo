@@ -20,6 +20,101 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
 
+  void _showImagePicker(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '이미지 첨부',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref
+                  .read(todoAddViewModelProvider.notifier)
+                  .pickImageFromGallery();
+            },
+            child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            '취소',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showImageOptions(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '이미지 관리',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _showImageFullScreen(context);
+            },
+            child: const Text('사진 크게 보기', style: TextStyle(fontSize: 16)),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(todoAddViewModelProvider.notifier).removeSelectedImage();
+            },
+            child: const Text(
+              '사진 삭제',
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            '취소',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showImageFullScreen(BuildContext context) {
+    final selectedImage = ref.read(todoAddViewModelProvider).selectedImage;
+    if (selectedImage == null) return;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: InteractiveViewer(
+                child: Center(
+                  child: Image.file(selectedImage, fit: BoxFit.contain),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showPrioritySelector(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
@@ -260,25 +355,59 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 68,
-                        height: 51,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final addState = ref.watch(todoAddViewModelProvider);
+                        final hasImage = addState.selectedImage != null;
+                        final isUploading = addState.isUploadingImage;
+
+                        return GestureDetector(
+                          onTap: isUploading
+                              ? null
+                              : hasImage
+                              ? () => _showImageOptions(context)
+                              : () => _showImagePicker(context),
+                          child: Container(
+                            width: 68,
+                            height: 51,
+                            decoration: BoxDecoration(
+                              color: hasImage
+                                  ? Colors.transparent
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 2,
+                              ),
+                            ),
+                            child: isUploading
+                                ? const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : hasImage
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      addState.selectedImage!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    ),
+                                  )
+                                : const Icon(
+                                    LucideIcons.imagePlus,
+                                    color: Colors.grey,
+                                    size: 30,
+                                  ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.add_photo_alternate_outlined,
-                          color: Colors.grey,
-                          size: 30,
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
