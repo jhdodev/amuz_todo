@@ -41,6 +41,110 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
     super.dispose();
   }
 
+  void _showImagePicker(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '이미지 첨부',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref
+                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
+                  .pickImageFromGallery();
+            },
+            child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            '취소',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showImageOptions(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text(
+          '이미지 관리',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              _showImageFullScreen(context);
+            },
+            child: const Text('사진 크게 보기', style: TextStyle(fontSize: 16)),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref
+                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
+                  .removeSelectedImage();
+            },
+            child: const Text(
+              '사진 삭제',
+              style: TextStyle(fontSize: 16, color: Colors.red),
+            ),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(
+            '취소',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showImageFullScreen(BuildContext context) {
+    final detailState = ref.read(todoDetailViewModelProvider(widget.todoId));
+
+    // 새로 선택된 이미지가 있으면 그것을, 없으면 기존 이미지를 표시
+    final selectedImage = detailState.selectedImage;
+    final existingImageUrl = detailState.todo?.imageUrl;
+
+    if (selectedImage == null && existingImageUrl == null) return;
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.9),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: InteractiveViewer(
+                child: Center(
+                  child: selectedImage != null
+                      ? Image.file(selectedImage, fit: BoxFit.contain)
+                      : Image.network(existingImageUrl!, fit: BoxFit.contain),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showPrioritySelector(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
@@ -241,7 +345,6 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       todoDetailViewModelProvider(widget.todoId),
                     );
 
-                    // todo 데이터 로드되면 컨트롤러에 값 설정
                     if (detailState.todo != null &&
                         _titleController.text.isEmpty) {
                       _titleController.text = detailState.todo!.title;
@@ -292,7 +395,6 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                             todoDetailViewModelProvider(widget.todoId),
                           );
 
-                          // todo 데이터 로드되면 컨트롤러에 값 설정
                           if (detailState.todo != null &&
                               _descriptionController.text.isEmpty) {
                             _descriptionController.text =
@@ -328,25 +430,82 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 68,
-                        height: 51,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final detailState = ref.watch(
+                          todoDetailViewModelProvider(widget.todoId),
+                        );
+                        final hasNewImage = detailState.selectedImage != null;
+                        final hasExistingImage =
+                            detailState.todo?.imageUrl != null;
+                        final hasAnyImage = hasNewImage || hasExistingImage;
+                        final isUploading = detailState.isUploadingImage;
+
+                        return GestureDetector(
+                          onTap: isUploading
+                              ? null
+                              : hasAnyImage
+                              ? () => _showImageOptions(context)
+                              : () => _showImagePicker(context),
+                          child: Container(
+                            width: 68,
+                            height: 51,
+                            decoration: BoxDecoration(
+                              color: hasAnyImage
+                                  ? Colors.transparent
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: Colors.grey.shade300,
+                                width: 2,
+                              ),
+                            ),
+                            child: isUploading
+                                ? const Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : hasNewImage
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      detailState.selectedImage!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    ),
+                                  )
+                                : hasExistingImage
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.network(
+                                      detailState.todo!.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return const Icon(
+                                              LucideIcons.imagePlus,
+                                              color: Colors.grey,
+                                              size: 30,
+                                            );
+                                          },
+                                    ),
+                                  )
+                                : const Icon(
+                                    LucideIcons.imagePlus,
+                                    color: Colors.grey,
+                                    size: 30,
+                                  ),
                           ),
-                        ),
-                        child: const Icon(
-                          LucideIcons.imagePlus,
-                          color: Colors.grey,
-                          size: 30,
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/repository/todo_repository.dart';
 import 'package:amuz_todo/src/model/tag.dart';
 import 'package:amuz_todo/src/model/todo.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'todo_detail_view_state.dart';
 
 final todoDetailRepositoryProvider = Provider<TodoRepository>((ref) {
@@ -10,6 +13,8 @@ final todoDetailRepositoryProvider = Provider<TodoRepository>((ref) {
 
 class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
   final TodoRepository _todoRepository;
+  final ImagePicker _imagePicker = ImagePicker();
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   TodoDetailViewModel(this._todoRepository)
     : super(const TodoDetailViewState());
@@ -76,12 +81,96 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
     }
   }
 
+  /// 갤러리에서 이미지 선택
+  Future<void> pickImageFromGallery() async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
+        state = state.copyWith(selectedImage: File(image.path));
+        await _uploadImage(image.path);
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: TodoDetailViewStatus.error,
+        errorMessage: '이미지를 선택하는 중 오류가 발생했습니다.',
+      );
+    }
+  }
+
+  /// 이미지 업로드
+  Future<void> _uploadImage(String imagePath) async {
+    state = state.copyWith(isUploadingImage: true);
+
+    try {
+      final imageUrl = await _uploadToSupabaseStorage(imagePath);
+      state = state.copyWith(isUploadingImage: false, imageUrl: imageUrl);
+    } catch (e) {
+      state = state.copyWith(
+        isUploadingImage: false,
+        status: TodoDetailViewStatus.error,
+        errorMessage: '이미지 업로드에 실패했습니다.',
+      );
+    }
+  }
+
+  /// Supabase Storage에 업로드
+  Future<String> _uploadToSupabaseStorage(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      final userId = _supabase.auth.currentUser?.id;
+
+      if (userId == null) {
+        throw Exception('로그인이 필요합니다');
+      }
+
+      final fileName =
+          'todo_${userId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = 'todos/$fileName';
+
+      await _supabase.storage
+          .from('todo-images')
+          .upload(
+            filePath,
+            file,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      final publicUrl = _supabase.storage
+          .from('todo-images')
+          .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (e) {
+      throw Exception('이미지 업로드에 실패했습니다: $e');
+    }
+  }
+
+  /// 선택된 이미지 제거
+  void removeSelectedImage() {
+    if (state.todo == null) return;
+
+    final newTodo = state.todo!.copyWith(clearImageUrl: true);
+
+    state = TodoDetailViewState(
+      status: state.status,
+      todo: newTodo,
+      availableTags: state.availableTags,
+      selectedTags: state.selectedTags,
+      errorMessage: state.errorMessage,
+      selectedImage: null,
+      isUploadingImage: false,
+      imageUrl: null,
+    );
+  }
+
   // Todo 업데이트
-  Future<bool> updateTodo({
-    required String title,
-    String? description,
-    String? imageUrl,
-  }) async {
+  Future<bool> updateTodo({required String title, String? description}) async {
     if (state.todo == null) return false;
 
     if (title.trim().isEmpty) {
@@ -95,12 +184,15 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
     state = state.copyWith(status: TodoDetailViewStatus.updating);
 
     try {
+      // 새 이미지가 있으면 새 URL 사용, 없으면 현재 todo의 imageUrl 사용
+      final imageUrlToSave = state.imageUrl ?? state.todo!.imageUrl;
+
       // Todo 업데이트
       await _todoRepository.updateTodo(
         todoId: state.todo!.id,
         title: title.trim(),
         description: description?.trim(),
-        imageUrl: imageUrl,
+        imageUrl: imageUrlToSave,
       );
 
       // 기존 태그 해제 후 새로 연결
