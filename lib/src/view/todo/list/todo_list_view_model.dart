@@ -39,6 +39,9 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
         todos: todos.cast(),
         userTags: userTags.cast(),
       );
+
+      // 초기 필터링 적용
+      _applyFilters();
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
@@ -52,12 +55,59 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     try {
       final todos = await _todoRepository.getTodos();
       state = state.copyWith(todos: todos);
+      _applyFilters(); // 새로고침 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
         errorMessage: e.toString(),
       );
     }
+  }
+
+  // 완료 상태 필터 변경
+  void setCompletionFilter(String filter) {
+    state = state.copyWith(completionFilter: filter);
+    _applyFilters();
+  }
+
+  // 태그 필터 변경
+  void toggleTagFilter(String tagName) {
+    List<String> newSelectedTags = List.from(state.selectedTags);
+    if (newSelectedTags.contains(tagName)) {
+      newSelectedTags.remove(tagName);
+    } else {
+      newSelectedTags.add(tagName);
+    }
+    state = state.copyWith(selectedTags: newSelectedTags);
+    _applyFilters();
+  }
+
+  // 필터링 로직 (private 메서드)
+  void _applyFilters() {
+    final filteredTodos = state.todos.where((todo) {
+      // 완료 상태 필터링
+      bool passesCompletionFilter = true;
+      if (state.completionFilter == '완료') {
+        passesCompletionFilter = todo.isCompleted;
+      } else if (state.completionFilter == '미완료') {
+        passesCompletionFilter = !todo.isCompleted;
+      }
+
+      // 태그 필터링
+      bool passesTagFilter = true;
+      if (state.selectedTags.isNotEmpty) {
+        passesTagFilter = state.selectedTags.every((selectedTag) {
+          final tagName = selectedTag.startsWith('#')
+              ? selectedTag.substring(1)
+              : selectedTag;
+          return todo.tags.any((tag) => tag.name == tagName);
+        });
+      }
+
+      return passesCompletionFilter && passesTagFilter;
+    }).toList();
+
+    state = state.copyWith(filteredTodos: filteredTodos);
   }
 
   // 새 Todo 생성
@@ -95,6 +145,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
       }).toList();
 
       state = state.copyWith(todos: updatedTodos);
+      _applyFilters(); // 상태 변경 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,
@@ -113,6 +164,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
           .toList();
 
       state = state.copyWith(todos: updatedTodos);
+      _applyFilters(); // 삭제 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
         status: TodoListViewStatus.error,

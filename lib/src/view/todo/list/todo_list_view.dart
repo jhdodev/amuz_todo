@@ -8,15 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-// 필터 상태를 관리하는 provider
-final filterProvider = StateProvider<String>((ref) => 'All');
-
 class TodoListView extends ConsumerWidget {
   const TodoListView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedFilter = ref.watch(filterProvider);
     final currentUserAsync = ref.watch(currentUserProvider);
     final todoListState = ref.watch(todoListViewModelProvider);
 
@@ -99,19 +95,33 @@ class TodoListView extends ConsumerWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildFilterButton('전체', selectedFilter, ref),
+                    _buildFilterButton(
+                      '전체',
+                      todoListState.completionFilter,
+                      ref,
+                    ),
                     const SizedBox(width: 10),
-                    _buildFilterButton('미완료', selectedFilter, ref),
+                    _buildFilterButton(
+                      '미완료',
+                      todoListState.completionFilter,
+                      ref,
+                    ),
                     const SizedBox(width: 10),
-                    _buildFilterButton('완료', selectedFilter, ref),
+                    _buildFilterButton(
+                      '완료',
+                      todoListState.completionFilter,
+                      ref,
+                    ),
+                    const SizedBox(width: 10),
+                    VerticalDivider(color: Colors.grey.shade300, thickness: 1),
                     const SizedBox(width: 10),
                     // 동적으로 태그 필터 버튼들 생성
                     ...todoListState.userTags
                         .map(
                           (tag) => [
-                            _buildFilterButton(
+                            _buildTagFilterButton(
                               '#${tag.name}',
-                              selectedFilter,
+                              todoListState.selectedTags,
                               ref,
                             ),
                             const SizedBox(width: 10),
@@ -142,18 +152,18 @@ class TodoListView extends ConsumerWidget {
                         ],
                       ),
                     )
-                  : todoListState.todos.isEmpty
+                  : todoListState.filteredTodos.isEmpty
                   ? const Center(
                       child: Text(
-                        '아직 할 일이 없습니다.\n새로운 할 일을 추가해보세요!',
+                        '조건에 맞는 할 일이 없습니다.',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     )
                   : ListView.builder(
-                      itemCount: todoListState.todos.length,
+                      itemCount: todoListState.filteredTodos.length,
                       itemBuilder: (context, index) {
-                        final todo = todoListState.todos[index];
+                        final todo = todoListState.filteredTodos[index];
                         final isCompleted = todo.isCompleted;
 
                         return Padding(
@@ -392,7 +402,9 @@ class TodoListView extends ConsumerWidget {
 
     return GestureDetector(
       onTap: () {
-        ref.read(filterProvider.notifier).state = filter;
+        ref
+            .read(todoListViewModelProvider.notifier)
+            .setCompletionFilter(filter);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -403,6 +415,36 @@ class TodoListView extends ConsumerWidget {
         ),
         child: Text(
           filter,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTagFilterButton(
+    String tagName,
+    List<String> selectedTags,
+    WidgetRef ref,
+  ) {
+    final isSelected = selectedTags.contains(tagName);
+
+    return GestureDetector(
+      onTap: () {
+        ref.read(todoListViewModelProvider.notifier).toggleTagFilter(tagName);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.grey.shade300, width: 1),
+        ),
+        child: Text(
+          tagName,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black,
             fontWeight: FontWeight.w500,
