@@ -79,6 +79,16 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
     state = state.copyWith(selectedPriority: priority);
   }
 
+  // 마감일 선택
+  void selectDueDate(DateTime? dueDate) {
+    state = state.copyWith(selectedDueDate: dueDate);
+  }
+
+  // 마감일 제거
+  void clearDueDate() {
+    state = state.copyWith(clearDueDate: true);
+  }
+
   // Todo 저장
   Future<bool> saveTodo({
     required String title,
@@ -102,6 +112,7 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
         description: description?.trim(),
         imageUrl: state.imageUrl,
         priority: state.selectedPriority,
+        dueDate: state.selectedDueDate,
       );
 
       // 선택된 태그들 처리

@@ -9,6 +9,7 @@ class Todo {
   final String? imageUrl;
   final List<Tag> tags;
   final Priority priority;
+  final DateTime? dueDate;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String userId;
@@ -21,6 +22,7 @@ class Todo {
     this.imageUrl,
     required this.tags,
     required this.priority,
+    this.dueDate,
     required this.createdAt,
     required this.updatedAt,
     required this.userId,
@@ -35,6 +37,9 @@ class Todo {
       imageUrl: json['image_url'] as String?,
       tags: [],
       priority: Priority.fromValue(json['priority'] as int),
+      dueDate: json['due_date'] != null
+          ? DateTime.parse(json['due_date'] as String)
+          : null,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       userId: json['user_id'] as String,
@@ -48,6 +53,8 @@ class Todo {
       'title': title,
       'description': description,
       'image_url': imageUrl,
+      'priority': priority.value,
+      'due_date': dueDate?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'user_id': userId,
@@ -62,11 +69,13 @@ class Todo {
     String? imageUrl,
     List<Tag>? tags,
     Priority? priority,
+    DateTime? dueDate,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? userId,
     bool? isCompleted,
     bool clearImageUrl = false,
+    bool clearDueDate = false,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -75,6 +84,7 @@ class Todo {
       imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
       tags: tags ?? this.tags,
       priority: priority ?? this.priority,
+      dueDate: clearDueDate ? null : (dueDate ?? this.dueDate),
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
@@ -93,6 +103,6 @@ class Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, priority: $priority, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, isCompleted: $isCompleted)';
+    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, priority: $priority, dueDate: $dueDate, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, isCompleted: $isCompleted)';
   }
 }

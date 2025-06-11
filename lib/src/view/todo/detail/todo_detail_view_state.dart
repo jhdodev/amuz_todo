@@ -18,6 +18,7 @@ class TodoDetailViewState {
   final List<Tag> availableTags; // 기존 태그
   final List<Tag> selectedTags; // 선택된 태그
   final Priority selectedPriority;
+  final DateTime? selectedDueDate;
   final String? errorMessage;
   final File? selectedImage;
   final bool isUploadingImage;
@@ -29,6 +30,7 @@ class TodoDetailViewState {
     this.availableTags = const [],
     this.selectedTags = const [],
     this.selectedPriority = Priority.medium,
+    this.selectedDueDate,
     this.errorMessage,
     this.selectedImage,
     this.isUploadingImage = false,
@@ -41,10 +43,12 @@ class TodoDetailViewState {
     List<Tag>? availableTags,
     List<Tag>? selectedTags,
     Priority? selectedPriority,
+    DateTime? selectedDueDate,
     String? errorMessage,
     File? selectedImage,
     bool? isUploadingImage,
     String? imageUrl,
+    bool clearDueDate = false,
   }) {
     return TodoDetailViewState(
       status: status ?? this.status,
@@ -52,6 +56,9 @@ class TodoDetailViewState {
       availableTags: availableTags ?? this.availableTags,
       selectedTags: selectedTags ?? this.selectedTags,
       selectedPriority: selectedPriority ?? this.selectedPriority,
+      selectedDueDate: clearDueDate
+          ? null
+          : (selectedDueDate ?? this.selectedDueDate),
       errorMessage: errorMessage ?? this.errorMessage,
       selectedImage: selectedImage ?? this.selectedImage,
       isUploadingImage: isUploadingImage ?? this.isUploadingImage,

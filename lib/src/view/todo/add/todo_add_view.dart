@@ -163,10 +163,14 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
   }
 
   void _showDatePicker(BuildContext context) {
+    final currentDueDate =
+        ref.read(todoAddViewModelProvider).selectedDueDate ?? DateTime.now();
+    DateTime tempDate = currentDueDate;
+
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => Container(
-        height: 250,
+        height: 320,
         padding: const EdgeInsets.only(top: 6.0),
         margin: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -194,28 +198,45 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.none,
-                        color: Colors.red,
+                        color: Colors.black,
                       ),
                     ),
                     CupertinoButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        ref
+                            .read(todoAddViewModelProvider.notifier)
+                            .selectDueDate(tempDate);
+                        Navigator.pop(context);
+                      },
                       child: const Text('완료'),
                     ),
                   ],
                 ),
               ),
+              // 마감일 제거 버튼 추가
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: CupertinoButton(
+                  onPressed: () {
+                    ref.read(todoAddViewModelProvider.notifier).clearDueDate();
+                    Navigator.pop(context);
+                  },
+                  child: const Text(
+                    '마감일 제거',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ),
               Expanded(
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
-                  initialDateTime: selectedDate,
+                  initialDateTime: currentDueDate,
                   minimumDate: DateTime.now().subtract(
                     const Duration(hours: 1),
                   ),
                   maximumDate: DateTime.now().add(const Duration(days: 365)),
                   onDateTimeChanged: (DateTime newDate) {
-                    setState(() {
-                      selectedDate = newDate;
-                    });
+                    tempDate = newDate;
                   },
                 ),
               ),
@@ -539,37 +560,54 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '마감일 설정',
+                    '마감일',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => _showDatePicker(context),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300, width: 2),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${selectedDate.year}년 ${selectedDate.month}월 ${selectedDate.day}일',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    final addState = ref.watch(todoAddViewModelProvider);
+                    final dueDate = addState.selectedDueDate;
+
+                    return GestureDetector(
+                      onTap: () => _showDatePicker(context),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
                         ),
-                        const Icon(Icons.calendar_today, color: Colors.grey),
-                      ],
-                    ),
-                  ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              dueDate != null
+                                  ? '${dueDate.year}년 ${dueDate.month}월 ${dueDate.day}일'
+                                  : '마감일을 선택해주세요',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: dueDate != null
+                                    ? Colors.black
+                                    : Colors.grey,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.calendar_today,
+                              color: Colors.grey,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextButton(

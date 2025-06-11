@@ -51,6 +51,7 @@ class TodoRepository {
     String? description,
     String? imageUrl,
     required Priority priority,
+    DateTime? dueDate, // 마감일 매개변수 추가
   }) async {
     try {
       final userId = _supabase.auth.currentUser!.id;
@@ -63,6 +64,7 @@ class TodoRepository {
             'image_url': imageUrl,
             'user_id': userId,
             'priority': priority.value,
+            'due_date': dueDate?.toIso8601String(), // 마감일 추가
           })
           .select()
           .single();
@@ -157,17 +159,28 @@ class TodoRepository {
     String? description,
     String? imageUrl,
     Priority? priority,
+    DateTime? dueDate, // 마감일 매개변수 추가
+    bool clearDueDate = false, // 마감일 삭제 옵션 추가
   }) async {
     try {
+      final updateData = {
+        'title': title,
+        'description': description,
+        'image_url': imageUrl,
+        'priority': priority?.value,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // 마감일 처리
+      if (clearDueDate) {
+        updateData['due_date'] = null;
+      } else if (dueDate != null) {
+        updateData['due_date'] = dueDate.toIso8601String();
+      }
+
       await _supabase
           .from('todos')
-          .update({
-            'title': title,
-            'description': description,
-            'image_url': imageUrl,
-            'priority': priority?.value,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
+          .update(updateData)
           .eq('id', todoId)
           .eq('user_id', _supabase.auth.currentUser!.id);
     } catch (e) {

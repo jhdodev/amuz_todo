@@ -24,6 +24,16 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
     state = state.copyWith(selectedPriority: priority);
   }
 
+  // 마감일 선택
+  void selectDueDate(DateTime? dueDate) {
+    state = state.copyWith(selectedDueDate: dueDate);
+  }
+
+  // 마감일 제거
+  void clearDueDate() {
+    state = state.copyWith(clearDueDate: true);
+  }
+
   // 특정 Todo 로드
   Future<void> loadTodo(String todoId) async {
     state = state.copyWith(status: TodoDetailViewStatus.loading);
@@ -44,6 +54,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         availableTags: availableTags,
         selectedTags: todo.tags, // 기존에 선택된 태그들
         selectedPriority: todo.priority,
+        selectedDueDate: todo.dueDate, // 마감일 초기화 추가
       );
     } catch (e) {
       state = state.copyWith(
@@ -200,6 +211,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         description: description?.trim(),
         imageUrl: imageUrlToSave,
         priority: state.selectedPriority,
+        dueDate: state.selectedDueDate,
       );
 
       // 기존 태그 해제 후 새로 연결
