@@ -23,6 +23,7 @@ class TodoListViewState {
   final List<String> selectedTags;
   final String? errorMessage;
   final SortOption sortOption;
+  final String searchQuery;
 
   const TodoListViewState({
     this.status = TodoListViewStatus.initial,
@@ -34,6 +35,7 @@ class TodoListViewState {
     this.selectedTags = const [],
     this.errorMessage,
     this.sortOption = SortOption.createdLate,
+    this.searchQuery = '',
   });
 
   TodoListViewState copyWith({
@@ -46,6 +48,7 @@ class TodoListViewState {
     List<String>? selectedTags,
     String? errorMessage,
     SortOption? sortOption,
+    String? searchQuery,
   }) {
     return TodoListViewState(
       status: status ?? this.status,
@@ -57,6 +60,7 @@ class TodoListViewState {
       selectedTags: selectedTags ?? this.selectedTags,
       errorMessage: errorMessage ?? this.errorMessage,
       sortOption: sortOption ?? this.sortOption,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }

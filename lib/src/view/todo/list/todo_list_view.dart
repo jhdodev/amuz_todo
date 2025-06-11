@@ -65,11 +65,19 @@ class TodoListView extends ConsumerWidget {
           children: [
             const SizedBox(height: 6),
             TextField(
+              onChanged: (value) => ref
+                  .read(todoListViewModelProvider.notifier)
+                  .setSearchQuery(value),
               cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: "검색어를 입력하세요",
                 prefixIcon: const Icon(LucideIcons.search),
-                suffixIcon: const Icon(LucideIcons.x),
+                suffixIcon: IconButton(
+                  onPressed: () => ref
+                      .read(todoListViewModelProvider.notifier)
+                      .clearSearch(),
+                  icon: const Icon(LucideIcons.x),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,

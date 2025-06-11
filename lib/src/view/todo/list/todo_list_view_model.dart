@@ -86,6 +86,15 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
   // 필터링과 정렬 로직
   void _applyFiltersAndSort() {
     final filteredTodos = state.todos.where((todo) {
+      // 검색어 필터링 (제목과 설명에서 검색) ← 이 부분 추가!
+      bool passesSearchFilter = true;
+      if (state.searchQuery.isNotEmpty) {
+        final query = state.searchQuery.toLowerCase();
+        passesSearchFilter =
+            todo.title.toLowerCase().contains(query) ||
+            (todo.description?.toLowerCase().contains(query) ?? false);
+      }
+
       // 완료 상태 필터링
       bool passesCompletionFilter = true;
       if (state.completionFilter == '완료') {
@@ -105,7 +114,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
         });
       }
 
-      return passesCompletionFilter && passesTagFilter;
+      return passesSearchFilter && passesCompletionFilter && passesTagFilter;
     }).toList();
 
     // 정렬 적용
@@ -211,6 +220,18 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
   // 정렬 옵션 변경
   void setSortOption(SortOption sortOption) {
     state = state.copyWith(sortOption: sortOption);
+    _applyFiltersAndSort();
+  }
+
+  // 검색어 변경
+  void setSearchQuery(String query) {
+    state = state.copyWith(searchQuery: query);
+    _applyFiltersAndSort();
+  }
+
+  // 검색어 초기화
+  void clearSearch() {
+    state = state.copyWith(searchQuery: '');
     _applyFiltersAndSort();
   }
 }
