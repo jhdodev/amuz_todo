@@ -55,6 +55,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         selectedTags: todo.tags, // 기존에 선택된 태그들
         selectedPriority: todo.priority,
         selectedDueDate: todo.dueDate, // 마감일 초기화 추가
+        clearDueDate: false,
       );
     } catch (e) {
       state = state.copyWith(
@@ -212,6 +213,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         imageUrl: imageUrlToSave,
         priority: state.selectedPriority,
         dueDate: state.selectedDueDate,
+        clearDueDate: state.clearDueDate,
       );
 
       // 기존 태그 해제 후 새로 연결
