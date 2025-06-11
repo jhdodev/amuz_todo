@@ -4,6 +4,15 @@ import 'package:amuz_todo/src/model/tag.dart';
 
 enum TodoListViewStatus { initial, loading, success, error }
 
+enum SortOption {
+  priorityHigh, // 우선순위 높은순
+  priorityLow, // 우선순위 낮은순
+  dueDateEarly, // 마감일 빠른순
+  dueDateLate, // 마감일 느린순
+  createdEarly, // 생성일 빠른순
+  createdLate, // 생성일 느린순
+}
+
 class TodoListViewState {
   final TodoListViewStatus status;
   final User? currentUser;
@@ -13,6 +22,7 @@ class TodoListViewState {
   final String completionFilter;
   final List<String> selectedTags;
   final String? errorMessage;
+  final SortOption sortOption;
 
   const TodoListViewState({
     this.status = TodoListViewStatus.initial,
@@ -23,6 +33,7 @@ class TodoListViewState {
     this.completionFilter = '전체',
     this.selectedTags = const [],
     this.errorMessage,
+    this.sortOption = SortOption.createdLate,
   });
 
   TodoListViewState copyWith({
@@ -34,6 +45,7 @@ class TodoListViewState {
     String? completionFilter,
     List<String>? selectedTags,
     String? errorMessage,
+    SortOption? sortOption,
   }) {
     return TodoListViewState(
       status: status ?? this.status,
@@ -44,6 +56,7 @@ class TodoListViewState {
       completionFilter: completionFilter ?? this.completionFilter,
       selectedTags: selectedTags ?? this.selectedTags,
       errorMessage: errorMessage ?? this.errorMessage,
+      sortOption: sortOption ?? this.sortOption,
     );
   }
 }
