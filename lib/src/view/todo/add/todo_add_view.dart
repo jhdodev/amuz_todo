@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_model.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_state.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ class TodoAddView extends ConsumerStatefulWidget {
 }
 
 class _TodoAddViewState extends ConsumerState<TodoAddView> {
-  String selectedPriority = '중요도 보통';
   DateTime selectedDate = DateTime.now();
 
   final TextEditingController _titleController = TextEditingController();
@@ -126,30 +126,30 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 높음';
-              });
+              ref
+                  .read(todoAddViewModelProvider.notifier)
+                  .selectPriority(Priority.high);
               Navigator.pop(context);
             },
-            child: const Text('중요도 높음'),
+            child: const Text('높음'),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 보통';
-              });
+              ref
+                  .read(todoAddViewModelProvider.notifier)
+                  .selectPriority(Priority.medium);
               Navigator.pop(context);
             },
-            child: const Text('중요도 보통'),
+            child: const Text('보통'),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 낮음';
-              });
+              ref
+                  .read(todoAddViewModelProvider.notifier)
+                  .selectPriority(Priority.low);
               Navigator.pop(context);
             },
-            child: const Text('중요도 낮음'),
+            child: const Text('낮음'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
@@ -518,7 +518,10 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          selectedPriority,
+                          ref
+                              .watch(todoAddViewModelProvider)
+                              .selectedPriority
+                              .displayName,
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.black,

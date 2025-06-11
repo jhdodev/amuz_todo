@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:amuz_todo/src/model/todo.dart';
 import 'package:amuz_todo/src/model/tag.dart';
@@ -49,6 +50,7 @@ class TodoRepository {
     required String title,
     String? description,
     String? imageUrl,
+    required Priority priority,
   }) async {
     try {
       final userId = _supabase.auth.currentUser!.id;
@@ -60,6 +62,7 @@ class TodoRepository {
             'description': description,
             'image_url': imageUrl,
             'user_id': userId,
+            'priority': priority.value,
           })
           .select()
           .single();
@@ -153,6 +156,7 @@ class TodoRepository {
     required String title,
     String? description,
     String? imageUrl,
+    Priority? priority,
   }) async {
     try {
       await _supabase
@@ -161,6 +165,7 @@ class TodoRepository {
             'title': title,
             'description': description,
             'image_url': imageUrl,
+            'priority': priority?.value,
             'updated_at': DateTime.now().toIso8601String(),
           })
           .eq('id', todoId)

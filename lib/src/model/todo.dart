@@ -1,3 +1,5 @@
+import 'package:amuz_todo/src/model/priority.dart';
+
 import 'tag.dart';
 
 class Todo {
@@ -6,6 +8,7 @@ class Todo {
   final String? description;
   final String? imageUrl;
   final List<Tag> tags;
+  final Priority priority;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String userId;
@@ -17,6 +20,7 @@ class Todo {
     this.description,
     this.imageUrl,
     required this.tags,
+    required this.priority,
     required this.createdAt,
     required this.updatedAt,
     required this.userId,
@@ -30,6 +34,7 @@ class Todo {
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
       tags: [],
+      priority: Priority.fromValue(json['priority'] as int),
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       userId: json['user_id'] as String,
@@ -56,6 +61,7 @@ class Todo {
     String? description,
     String? imageUrl,
     List<Tag>? tags,
+    Priority? priority,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? userId,
@@ -68,6 +74,7 @@ class Todo {
       description: description ?? this.description,
       imageUrl: clearImageUrl ? null : (imageUrl ?? this.imageUrl),
       tags: tags ?? this.tags,
+      priority: priority ?? this.priority,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
@@ -86,6 +93,6 @@ class Todo {
 
   @override
   String toString() {
-    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, isCompleted: $isCompleted)';
+    return 'Todo(id: $id, title: $title, description: $description, tags: $tags, priority: $priority, createdAt: $createdAt, updatedAt: $updatedAt, userId: $userId, isCompleted: $isCompleted)';
   }
 }

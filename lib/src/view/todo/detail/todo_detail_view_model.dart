@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/repository/todo_repository.dart';
 import 'package:amuz_todo/src/model/tag.dart';
@@ -19,6 +20,10 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
   TodoDetailViewModel(this._todoRepository)
     : super(const TodoDetailViewState());
 
+  void selectPriority(Priority priority) {
+    state = state.copyWith(selectedPriority: priority);
+  }
+
   // 특정 Todo 로드
   Future<void> loadTodo(String todoId) async {
     state = state.copyWith(status: TodoDetailViewStatus.loading);
@@ -38,6 +43,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         todo: todo,
         availableTags: availableTags,
         selectedTags: todo.tags, // 기존에 선택된 태그들
+        selectedPriority: todo.priority,
       );
     } catch (e) {
       state = state.copyWith(
@@ -193,6 +199,7 @@ class TodoDetailViewModel extends StateNotifier<TodoDetailViewState> {
         title: title.trim(),
         description: description?.trim(),
         imageUrl: imageUrlToSave,
+        priority: state.selectedPriority,
       );
 
       // 기존 태그 해제 후 새로 연결

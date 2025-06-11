@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/repository/todo_repository.dart';
 import 'package:amuz_todo/src/model/tag.dart';
@@ -74,6 +75,10 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
     }
   }
 
+  void selectPriority(Priority priority) {
+    state = state.copyWith(selectedPriority: priority);
+  }
+
   // Todo 저장
   Future<bool> saveTodo({
     required String title,
@@ -96,6 +101,7 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
         title: title.trim(),
         description: description?.trim(),
         imageUrl: state.imageUrl,
+        priority: state.selectedPriority,
       );
 
       // 선택된 태그들 처리

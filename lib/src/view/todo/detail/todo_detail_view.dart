@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_model.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_state.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ class TodoDetailView extends ConsumerStatefulWidget {
 }
 
 class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
-  String selectedPriority = '중요도 보통';
   DateTime selectedDate = DateTime.now();
 
   final TextEditingController _titleController = TextEditingController();
@@ -156,30 +156,30 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
         actions: [
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 높음';
-              });
+              ref
+                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
+                  .selectPriority(Priority.high);
               Navigator.pop(context);
             },
-            child: const Text('중요도 높음'),
+            child: const Text('높음'),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 보통';
-              });
+              ref
+                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
+                  .selectPriority(Priority.medium);
               Navigator.pop(context);
             },
-            child: const Text('중요도 보통'),
+            child: const Text('보통'),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
-              setState(() {
-                selectedPriority = '중요도 낮음';
-              });
+              ref
+                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
+                  .selectPriority(Priority.low);
               Navigator.pop(context);
             },
-            child: const Text('중요도 낮음'),
+            child: const Text('낮음'),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
@@ -626,7 +626,10 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          selectedPriority,
+                          ref
+                              .watch(todoDetailViewModelProvider(widget.todoId))
+                              .selectedPriority
+                              .displayName,
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.black,

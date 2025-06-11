@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/model/priority.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/repository/auth_repository.dart';
@@ -70,6 +71,7 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
         title: title,
         description: description,
         imageUrl: imageUrl,
+        priority: Priority.medium,
       );
 
       // 목록 새로고침
