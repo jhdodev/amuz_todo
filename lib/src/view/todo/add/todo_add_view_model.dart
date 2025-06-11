@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:amuz_todo/src/model/priority.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/repository/todo_repository.dart';
 import 'package:amuz_todo/src/model/tag.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'todo_add_view_state.dart';
 
@@ -128,6 +130,8 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
       }
 
       state = state.copyWith(status: TodoAddViewStatus.success);
+      // Todo 등록 성공 시 임시 저장 데이터 삭제
+      await clearDraft();
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -238,6 +242,54 @@ class TodoAddViewModel extends StateNotifier<TodoAddViewState> {
   void resetState() {
     state = const TodoAddViewState();
     loadAvailableTags();
+  }
+
+  Future<void> saveDraft({required String title, String? description}) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('draft_title', title);
+    await prefs.setString('draft_description', description ?? '');
+    await prefs.setInt('draft_priority', state.selectedPriority.value);
+    await prefs.setString(
+      'draft_due_date',
+      state.selectedDueDate?.toIso8601String() ?? '',
+    );
+
+    // 선택된 태그들을 JSON으로 저장
+    final tagNames = state.selectedTags.map((tag) => tag.name).toList();
+    await prefs.setString('draft_tags', jsonEncode(tagNames));
+
+    print('🔥 임시 저장 완료!');
+  }
+
+  // 임시 저장된 데이터가 있는지 확인
+  Future<bool> hasDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    final title = prefs.getString('draft_title') ?? '';
+    return title.isNotEmpty;
+  }
+
+  // 임시 저장된 데이터 불러오기
+  Future<Map<String, dynamic>> loadDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'title': prefs.getString('draft_title') ?? '',
+      'description': prefs.getString('draft_description') ?? '',
+      'priority': prefs.getInt('draft_priority') ?? 2,
+      'due_date': prefs.getString('draft_due_date') ?? '',
+      'tags': prefs.getString('draft_tags') ?? '[]',
+    };
+  }
+
+  // 임시 저장 데이터 삭제
+  Future<void> clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_title');
+    await prefs.remove('draft_description');
+    await prefs.remove('draft_priority');
+    await prefs.remove('draft_due_date');
+    await prefs.remove('draft_tags');
+    print('🔥 임시 저장 데이터 삭제 완료!');
   }
 }
 

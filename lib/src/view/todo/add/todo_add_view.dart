@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_model.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_state.dart';
@@ -19,6 +20,113 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // 페이지가 열릴 때 임시 저장 데이터 확인
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkDraft();
+    });
+  }
+
+  // 임시 저장 데이터 확인 후 사용자에게 물어보기
+  Future<void> _checkDraft() async {
+    final hasDraft = await ref
+        .read(todoAddViewModelProvider.notifier)
+        .hasDraft();
+
+    if (hasDraft && mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('작성 중인 내용이 있습니다'),
+          content: const Text(
+            "이전에 작성하던 내용을 불러올까요?\n '아니오'를 선택하시면 작성했던 내용이 삭제됩니다.",
+            style: TextStyle(fontSize: 14),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                // 임시 저장 데이터 삭제
+                ref.read(todoAddViewModelProvider.notifier).clearDraft();
+              },
+              child: const Text('아니요', style: TextStyle(color: Colors.red)),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(context);
+                _loadDraft(); // 임시 저장 데이터 불러오기
+              },
+              child: const Text(
+                '네',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  // 임시 저장된 데이터 불러와서 UI에 적용
+  Future<void> _loadDraft() async {
+    try {
+      final draftData = await ref
+          .read(todoAddViewModelProvider.notifier)
+          .loadDraft();
+
+      // 텍스트 필드에 저장된 내용 설정
+      _titleController.text = draftData['title'] ?? '';
+      _descriptionController.text = draftData['description'] ?? '';
+
+      // 우선순위 설정
+      final priorityValue = draftData['priority'] ?? 2;
+      final priority = Priority.fromValue(priorityValue);
+      ref.read(todoAddViewModelProvider.notifier).selectPriority(priority);
+
+      // 마감일 설정
+      final dueDateString = draftData['due_date'] ?? '';
+      if (dueDateString.isNotEmpty) {
+        final dueDate = DateTime.parse(dueDateString);
+        ref.read(todoAddViewModelProvider.notifier).selectDueDate(dueDate);
+      }
+
+      // 태그 설정
+      final tagsJson = draftData['tags'] ?? '[]';
+      final tagNames = List<String>.from(jsonDecode(tagsJson));
+
+      // 저장된 태그들을 선택 상태로 만들기
+      final viewModel = ref.read(todoAddViewModelProvider.notifier);
+      for (String tagName in tagNames) {
+        // 기존 태그 중에서 찾아서 선택
+        final availableTags = ref.read(todoAddViewModelProvider).availableTags;
+        final tag = availableTags.firstWhere(
+          (t) => t.name == tagName,
+          orElse: () => throw Exception('Tag not found'),
+        );
+        viewModel.toggleTag(tag);
+      }
+
+      print('🔥 임시 저장 데이터 불러오기 완료!');
+
+      // 사용자에게 불러오기 완료 알림
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('이전 작성 내용을 불러왔습니다! 📋'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('🔥 임시 저장 데이터 불러오기 실패: $e');
+    }
+  }
 
   void _showImagePicker(BuildContext context) {
     showCupertinoModalPopup(
@@ -611,7 +719,25 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () => {},
+                  onPressed: () async {
+                    // 임시 저장 실행
+                    await ref
+                        .read(todoAddViewModelProvider.notifier)
+                        .saveDraft(
+                          title: _titleController.text,
+                          description: _descriptionController.text,
+                        );
+
+                    // 사용자에게 저장 완료 알림
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('임시 저장 완료!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
                   child: const Text(
                     '임시 저장',
                     style: TextStyle(
