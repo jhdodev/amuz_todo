@@ -16,9 +16,34 @@ final todoRepositoryProvider = Provider<TodoRepository>((ref) {
 
 class TodoListViewModel extends StateNotifier<TodoListViewState> {
   final TodoRepository _todoRepository;
+  final Ref _ref;
 
-  TodoListViewModel(this._todoRepository) : super(const TodoListViewState()) {
-    loadInitialData();
+  TodoListViewModel(this._todoRepository, this._ref)
+    : super(const TodoListViewState()) {
+    // 사용자 상태 변화 감지
+    _ref.listen(currentUserProvider, (previous, next) {
+      if (previous != next) {
+        if (next.hasValue && next.value != null) {
+          // 새로운 사용자로 로그인 시 데이터 로드
+          loadInitialData();
+        } else {
+          // 로그아웃 시 상태 초기화
+          _resetState();
+        }
+      }
+    });
+
+    // 초기 데이터 로딩은 사용자가 있을 때만
+    final currentUser = _ref.read(currentUserProvider);
+    if (currentUser.hasValue && currentUser.value != null) {
+      loadInitialData();
+    }
+  }
+
+  // 상태 초기화
+  void _resetState() {
+    print('🔥 TodoListViewModel: 상태 초기화');
+    state = const TodoListViewState();
   }
 
   // 초기 데이터 로딩
@@ -239,5 +264,5 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
 final todoListViewModelProvider =
     StateNotifierProvider<TodoListViewModel, TodoListViewState>((ref) {
       final todoRepository = ref.watch(todoRepositoryProvider);
-      return TodoListViewModel(todoRepository);
+      return TodoListViewModel(todoRepository, ref);
     });
