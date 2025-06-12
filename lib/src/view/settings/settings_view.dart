@@ -65,7 +65,7 @@ class SettingsView extends ConsumerWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              EditNameView(currentName: user.name ?? ''),
+                              EditNameView(currentName: user.name),
                         ),
                       );
                     }
