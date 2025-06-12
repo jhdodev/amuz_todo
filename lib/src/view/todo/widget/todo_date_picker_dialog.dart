@@ -39,7 +39,10 @@ class _TodoDatePickerDialogState extends State<TodoDatePickerDialog> {
   @override
   void initState() {
     super.initState();
-    tempDate = widget.initialDate;
+    final minimumDate = DateTime.now().subtract(const Duration(hours: 1));
+    tempDate = widget.initialDate.isBefore(minimumDate)
+        ? minimumDate
+        : widget.initialDate;
   }
 
   @override
@@ -96,13 +99,25 @@ class _TodoDatePickerDialogState extends State<TodoDatePickerDialog> {
               ),
             ),
             Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: widget.initialDate,
-                minimumDate: DateTime.now().subtract(const Duration(hours: 1)),
-                maximumDate: DateTime.now().add(const Duration(days: 365)),
-                onDateTimeChanged: (DateTime newDate) {
-                  tempDate = newDate;
+              child: Builder(
+                builder: (context) {
+                  final minimumDate = DateTime.now().subtract(
+                    const Duration(hours: 1),
+                  );
+                  final initialDateTime =
+                      widget.initialDate.isBefore(minimumDate)
+                      ? minimumDate
+                      : widget.initialDate;
+
+                  return CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: initialDateTime,
+                    minimumDate: minimumDate,
+                    maximumDate: DateTime.now().add(const Duration(days: 365)),
+                    onDateTimeChanged: (DateTime newDate) {
+                      tempDate = newDate;
+                    },
+                  );
                 },
               ),
             ),
