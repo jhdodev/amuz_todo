@@ -9,11 +9,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class TodoListView extends ConsumerWidget {
+class TodoListView extends ConsumerStatefulWidget {
   const TodoListView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TodoListView> createState() => _TodoListViewState();
+}
+
+class _TodoListViewState extends ConsumerState<TodoListView> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentUserAsync = ref.watch(currentUserProvider);
     final todoListState = ref.watch(todoListViewModelProvider);
 
@@ -65,6 +84,7 @@ class TodoListView extends ConsumerWidget {
           children: [
             const SizedBox(height: 6),
             TextField(
+              controller: _searchController,
               onChanged: (value) => ref
                   .read(todoListViewModelProvider.notifier)
                   .setSearchQuery(value),
@@ -73,9 +93,10 @@ class TodoListView extends ConsumerWidget {
                 hintText: "검색어를 입력하세요",
                 prefixIcon: const Icon(LucideIcons.search),
                 suffixIcon: IconButton(
-                  onPressed: () => ref
-                      .read(todoListViewModelProvider.notifier)
-                      .clearSearch(),
+                  onPressed: () {
+                    _searchController.clear();
+                    ref.read(todoListViewModelProvider.notifier).clearSearch();
+                  },
                   icon: const Icon(LucideIcons.x),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
