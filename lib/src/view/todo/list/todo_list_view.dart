@@ -1,4 +1,3 @@
-import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
@@ -10,7 +9,6 @@ import 'package:amuz_todo/src/view/todo/list/widget/filter_buttons_row.dart';
 import 'package:amuz_todo/src/view/todo/list/widget/todo_list_item.dart';
 import 'package:amuz_todo/src/view/todo/list/widget/sort_action_sheet.dart';
 import 'package:amuz_todo/src/view/todo/list/widget/user_profile_header.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
