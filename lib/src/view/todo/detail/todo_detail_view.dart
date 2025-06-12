@@ -1,6 +1,11 @@
-import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_model.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_state.dart';
+import 'package:amuz_todo/src/view/common/widget/image_picker_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_options_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_full_screen_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/priority_selector_action_sheet.dart';
+import 'package:amuz_todo/src/view/todo/widget/todo_date_picker_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/tag_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,72 +47,21 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   }
 
   void _showImagePicker(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 첨부',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .pickImageFromGallery();
-            },
-            child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImagePickerActionSheet.show(
+      context,
+      onGalleryTap: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .pickImageFromGallery(),
     );
   }
 
   void _showImageOptions(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 관리',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _showImageFullScreen(context);
-            },
-            child: const Text('사진 크게 보기', style: TextStyle(fontSize: 16)),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .removeSelectedImage();
-            },
-            child: const Text(
-              '사진 삭제',
-              style: TextStyle(fontSize: 16, color: Colors.red),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImageOptionsActionSheet.show(
+      context,
+      onViewTap: () => _showImageFullScreen(context),
+      onDeleteTap: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .removeSelectedImage(),
     );
   }
 
@@ -120,75 +74,19 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
     if (selectedImage == null && existingImageUrl == null) return;
 
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.9),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: InteractiveViewer(
-                child: Center(
-                  child: selectedImage != null
-                      ? Image.file(selectedImage, fit: BoxFit.contain)
-                      : Image.network(existingImageUrl!, fit: BoxFit.contain),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    ImageFullScreenDialog.show(
+      context,
+      imageFile: selectedImage,
+      imageUrl: existingImageUrl,
     );
   }
 
   void _showPrioritySelector(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '우선 순위',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.high);
-              Navigator.pop(context);
-            },
-            child: const Text('높음'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.medium);
-              Navigator.pop(context);
-            },
-            child: const Text('보통'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.low);
-              Navigator.pop(context);
-            },
-            child: const Text('낮음'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('취소'),
-        ),
-      ),
+    PrioritySelectorActionSheet.show(
+      context,
+      onPrioritySelected: (priority) => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .selectPriority(priority),
     );
   }
 
@@ -196,93 +94,16 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
     final currentDueDate =
         ref.read(todoDetailViewModelProvider(widget.todoId)).selectedDueDate ??
         DateTime.now();
-    DateTime tempDate = currentDueDate;
 
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 320,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('취소'),
-                    ),
-                    const Text(
-                      '마감일 선택',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                        color: Colors.black,
-                      ),
-                    ),
-                    CupertinoButton(
-                      onPressed: () {
-                        ref
-                            .read(
-                              todoDetailViewModelProvider(
-                                widget.todoId,
-                              ).notifier,
-                            )
-                            .selectDueDate(tempDate);
-                        Navigator.pop(context);
-                      },
-                      child: const Text('완료'),
-                    ),
-                  ],
-                ),
-              ),
-              // 마감일 제거 버튼 추가
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: CupertinoButton(
-                  onPressed: () {
-                    ref
-                        .read(
-                          todoDetailViewModelProvider(widget.todoId).notifier,
-                        )
-                        .clearDueDate();
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    '마감일 제거',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: currentDueDate,
-                  minimumDate: DateTime.now().subtract(
-                    const Duration(hours: 1),
-                  ),
-                  maximumDate: DateTime.now().add(const Duration(days: 365)),
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempDate = newDate;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    TodoDatePickerDialog.show(
+      context,
+      initialDate: currentDueDate,
+      onDateSelected: (date) => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .selectDueDate(date),
+      onDateCleared: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .clearDueDate(),
     );
   }
 
@@ -563,8 +384,8 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                             ...detailState.availableTags.map(
                               (tag) => Padding(
                                 padding: const EdgeInsets.only(right: 10),
-                                child: _buildTag(
-                                  tag.name,
+                                child: TagWidget(
+                                  tag: tag.name,
                                   isSelected: detailState.selectedTags.any(
                                     (t) => t.name == tag.name,
                                   ),
@@ -811,26 +632,4 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
       ),
     );
   }
-}
-
-Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Text(
-        '#$tag',
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-      ),
-    ),
-  );
 }

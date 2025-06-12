@@ -2,8 +2,14 @@ import 'dart:convert';
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_model.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_state.dart';
+import 'package:amuz_todo/src/view/common/widget/image_picker_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_options_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_full_screen_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/priority_selector_action_sheet.dart';
+import 'package:amuz_todo/src/view/todo/widget/todo_date_picker_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/tag_widget.dart';
+import 'package:amuz_todo/src/view/todo/add/widget/draft_confirmation_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -37,38 +43,11 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
         .hasDraft();
 
     if (hasDraft && mounted) {
-      showDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('작성 중인 내용이 있습니다'),
-          content: const Text(
-            "이전에 작성하던 내용을 불러올까요?\n '아니오'를 선택하시면 작성했던 내용이 삭제됩니다.",
-            style: TextStyle(fontSize: 14),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context);
-                // 임시 저장 데이터 삭제
-                ref.read(todoAddViewModelProvider.notifier).clearDraft();
-              },
-              child: const Text('아니요', style: TextStyle(color: Colors.red)),
-            ),
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.pop(context);
-                _loadDraft(); // 임시 저장 데이터 불러오기
-              },
-              child: const Text(
-                '네',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+      DraftConfirmationDialog.show(
+        context,
+        onLoadDraft: _loadDraft,
+        onDiscardDraft: () =>
+            ref.read(todoAddViewModelProvider.notifier).clearDraft(),
       );
     }
   }
@@ -129,70 +108,19 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
   }
 
   void _showImagePicker(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 첨부',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(todoAddViewModelProvider.notifier)
-                  .pickImageFromGallery();
-            },
-            child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImagePickerActionSheet.show(
+      context,
+      onGalleryTap: () =>
+          ref.read(todoAddViewModelProvider.notifier).pickImageFromGallery(),
     );
   }
 
   void _showImageOptions(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 관리',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _showImageFullScreen(context);
-            },
-            child: const Text('사진 크게 보기', style: TextStyle(fontSize: 16)),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(todoAddViewModelProvider.notifier).removeSelectedImage();
-            },
-            child: const Text(
-              '사진 삭제',
-              style: TextStyle(fontSize: 16, color: Colors.red),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImageOptionsActionSheet.show(
+      context,
+      onViewTap: () => _showImageFullScreen(context),
+      onDeleteTap: () =>
+          ref.read(todoAddViewModelProvider.notifier).removeSelectedImage(),
     );
   }
 
@@ -200,158 +128,28 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
     final selectedImage = ref.read(todoAddViewModelProvider).selectedImage;
     if (selectedImage == null) return;
 
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.9),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: InteractiveViewer(
-                child: Center(
-                  child: Image.file(selectedImage, fit: BoxFit.contain),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    ImageFullScreenDialog.show(context, imageFile: selectedImage);
   }
 
   void _showPrioritySelector(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '우선 순위',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoAddViewModelProvider.notifier)
-                  .selectPriority(Priority.high);
-              Navigator.pop(context);
-            },
-            child: const Text('높음'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoAddViewModelProvider.notifier)
-                  .selectPriority(Priority.medium);
-              Navigator.pop(context);
-            },
-            child: const Text('보통'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoAddViewModelProvider.notifier)
-                  .selectPriority(Priority.low);
-              Navigator.pop(context);
-            },
-            child: const Text('낮음'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('취소'),
-        ),
-      ),
+    PrioritySelectorActionSheet.show(
+      context,
+      onPrioritySelected: (priority) =>
+          ref.read(todoAddViewModelProvider.notifier).selectPriority(priority),
     );
   }
 
   void _showDatePicker(BuildContext context) {
     final currentDueDate =
         ref.read(todoAddViewModelProvider).selectedDueDate ?? DateTime.now();
-    DateTime tempDate = currentDueDate;
 
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 320,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('취소'),
-                    ),
-                    const Text(
-                      '마감일 선택',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                        color: Colors.black,
-                      ),
-                    ),
-                    CupertinoButton(
-                      onPressed: () {
-                        ref
-                            .read(todoAddViewModelProvider.notifier)
-                            .selectDueDate(tempDate);
-                        Navigator.pop(context);
-                      },
-                      child: const Text('완료'),
-                    ),
-                  ],
-                ),
-              ),
-              // 마감일 제거 버튼 추가
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: CupertinoButton(
-                  onPressed: () {
-                    ref.read(todoAddViewModelProvider.notifier).clearDueDate();
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    '마감일 제거',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: currentDueDate,
-                  minimumDate: DateTime.now().subtract(
-                    const Duration(hours: 1),
-                  ),
-                  maximumDate: DateTime.now().add(const Duration(days: 365)),
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempDate = newDate;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    TodoDatePickerDialog.show(
+      context,
+      initialDate: currentDueDate,
+      onDateSelected: (date) =>
+          ref.read(todoAddViewModelProvider.notifier).selectDueDate(date),
+      onDateCleared: () =>
+          ref.read(todoAddViewModelProvider.notifier).clearDueDate(),
     );
   }
 
@@ -562,8 +360,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                             ...addState.availableTags.map(
                               (tag) => Padding(
                                 padding: const EdgeInsets.only(right: 10),
-                                child: _buildTag(
-                                  tag.name,
+                                child: TagWidget(
+                                  tag: tag.name,
                                   isSelected: addState.selectedTags.any(
                                     (t) => t.name == tag.name,
                                   ),
@@ -754,26 +552,4 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
       ),
     );
   }
-}
-
-Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Text(
-        '#$tag',
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-      ),
-    ),
-  );
 }
