@@ -193,6 +193,9 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
       final authService = _ref.read(authServiceProvider);
       await authService.deleteAccount();
 
+      // 계정 삭제 후 모든 상태 초기화
+      _invalidateAllProviders();
+
       print('🔥 SettingsViewModel: 계정 삭제 성공');
 
       state = state.copyWith(
