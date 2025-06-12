@@ -33,8 +33,11 @@ class FilterButtonsRow extends ConsumerWidget {
             const SizedBox(width: 10),
             _buildFilterButton('완료', completionFilter, ref),
             const SizedBox(width: 10),
-            VerticalDivider(color: Colors.grey.shade300, thickness: 1),
-            const SizedBox(width: 10),
+            // 태그가 있을 때만 디바이더 표시
+            if (userTags.isNotEmpty) ...[
+              VerticalDivider(color: Colors.grey.shade300, thickness: 1),
+              const SizedBox(width: 10),
+            ],
             // 동적으로 태그 필터 버튼들 생성
             ...userTags
                 .map(
