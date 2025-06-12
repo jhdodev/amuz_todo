@@ -461,28 +461,38 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       height: 50,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            ...detailState.availableTags.map(
-                              (tag) => Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: TagWidget(
-                                  tag: tag.name,
-                                  isSelected: detailState.selectedTags.any(
-                                    (t) => t.name == tag.name,
+                        child: detailState.availableTags.isEmpty
+                            ? const Align(
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    '태그를 추가해 주세요.',
+                                    style: TextStyle(color: Colors.grey),
                                   ),
-                                  onTap: () => ref
-                                      .read(
-                                        todoDetailViewModelProvider(
-                                          widget.todoId,
-                                        ).notifier,
-                                      )
-                                      .toggleTag(tag),
                                 ),
+                              )
+                            : Row(
+                                children: [
+                                  ...detailState.availableTags.map(
+                                    (tag) => Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: TagWidget(
+                                        tag: tag.name,
+                                        isSelected: detailState.selectedTags
+                                            .any((t) => t.name == tag.name),
+                                        onTap: () => ref
+                                            .read(
+                                              todoDetailViewModelProvider(
+                                                widget.todoId,
+                                              ).notifier,
+                                            )
+                                            .toggleTag(tag),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                     );
                   },

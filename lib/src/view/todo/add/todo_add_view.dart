@@ -431,24 +431,37 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       height: 50,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            ...addState.availableTags.map(
-                              (tag) => Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: TagWidget(
-                                  tag: tag.name,
-                                  isSelected: addState.selectedTags.any(
-                                    (t) => t.name == tag.name,
+                        child: addState.availableTags.isEmpty
+                            ? const Align(
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    '태그를 추가해 주세요.',
+                                    style: TextStyle(color: Colors.grey),
                                   ),
-                                  onTap: () => ref
-                                      .read(todoAddViewModelProvider.notifier)
-                                      .toggleTag(tag),
                                 ),
+                              )
+                            : Row(
+                                children: [
+                                  ...addState.availableTags.map(
+                                    (tag) => Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: TagWidget(
+                                        tag: tag.name,
+                                        isSelected: addState.selectedTags.any(
+                                          (t) => t.name == tag.name,
+                                        ),
+                                        onTap: () => ref
+                                            .read(
+                                              todoAddViewModelProvider.notifier,
+                                            )
+                                            .toggleTag(tag),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                     );
                   },
