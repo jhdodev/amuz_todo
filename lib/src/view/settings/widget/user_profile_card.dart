@@ -1,4 +1,5 @@
 import 'package:amuz_todo/src/model/user.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -19,13 +20,18 @@ class UserProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
+
     return SizedBox(
       width: double.infinity,
       child: Card(
-        color: Colors.white,
+        color: isDarkMode ? Color(0xFF181818) : Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey.shade200, width: 1),
+          side: BorderSide(
+            color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Padding(
@@ -72,13 +78,18 @@ class UserProfileCard extends ConsumerWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: Colors.black,
+                          color: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(
+                            color: isDarkMode
+                                ? Color(0xFF181818)
+                                : Colors.white,
+                            width: 2,
+                          ),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           LucideIcons.camera,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.black : Colors.white,
                           size: 16,
                         ),
                       ),
@@ -94,16 +105,19 @@ class UserProfileCard extends ConsumerWidget {
                   width: 80,
                   height: 20,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: isDarkMode
+                        ? Color(0xFF272727)
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 )
               else
                 Text(
                   user?.name ?? 'default',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
                   ),
                 ),
 
@@ -114,14 +128,19 @@ class UserProfileCard extends ConsumerWidget {
                   width: 120,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
+                    color: isDarkMode
+                        ? Color(0xFF272727)
+                        : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 )
               else
                 Text(
                   user?.email ?? 'default@example.com',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                  ),
                 ),
             ],
           ),

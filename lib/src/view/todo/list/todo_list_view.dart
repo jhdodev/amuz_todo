@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view.dart';
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_model.dart';
@@ -40,22 +41,30 @@ class _TodoListViewState extends ConsumerState<TodoListView> {
   Widget build(BuildContext context) {
     final currentUserAsync = ref.watch(currentUserProvider);
     final todoListState = ref.watch(todoListViewModelProvider);
+    final isDarkMode = ref.watch(isDarkModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "amuz todo",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         surfaceTintColor: Colors.white,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16),
           child: IconButton(
             onPressed: () => _showSortDialog(context),
-            icon: const Icon(LucideIcons.listFilter),
+            icon: Icon(
+              LucideIcons.listFilter,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
           ),
         ),
         actions: [UserProfileHeader(userAsync: currentUserAsync)],
@@ -164,10 +173,13 @@ class _TodoListViewState extends ConsumerState<TodoListView> {
             ref.read(todoListViewModelProvider.notifier).refreshTodos();
           }
         },
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.white : Colors.black,
+        foregroundColor: isDarkMode ? Colors.black : Colors.white,
         shape: CircleBorder(),
-        child: const Icon(LucideIcons.plus),
+        child: Icon(
+          LucideIcons.plus,
+          color: isDarkMode ? Colors.black : Colors.white,
+        ),
       ),
     );
   }

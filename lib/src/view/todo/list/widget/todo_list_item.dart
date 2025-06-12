@@ -1,9 +1,11 @@
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/model/todo.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class TodoListItem extends StatelessWidget {
+class TodoListItem extends ConsumerWidget {
   const TodoListItem({
     super.key,
     required this.todo,
@@ -18,16 +20,19 @@ class TodoListItem extends StatelessWidget {
   final VoidCallback onDelete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isCompleted = todo.isCompleted;
-
+    final isDarkMode = ref.watch(isDarkModeProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Card(
-        color: Colors.white,
+        color: isDarkMode ? Color(0xFF181818) : Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Colors.grey.shade200, width: 1),
+          side: BorderSide(
+            color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(14),
         ),
         child: ListTile(
@@ -36,8 +41,8 @@ class TodoListItem extends StatelessWidget {
             scale: 1.2,
             child: Checkbox(
               value: isCompleted,
-              activeColor: Colors.black,
-              checkColor: Colors.white,
+              activeColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+              checkColor: isDarkMode ? Color(0xFF181818) : Colors.white,
               side: BorderSide(color: Colors.grey.shade400, width: 1.0),
               onChanged: (bool? value) {
                 if (value != null) {
@@ -51,10 +56,20 @@ class TodoListItem extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
-              color: isCompleted ? Colors.grey[600] : Colors.black,
+              color: isCompleted
+                  ? isDarkMode
+                        ? Color(0xFFA0A0A0)
+                        : Colors.grey[600]
+                  : isDarkMode
+                  ? Color(0xFFFAFAFA)
+                  : Colors.black,
               decoration: isCompleted
                   ? TextDecoration.lineThrough
                   : TextDecoration.none,
+              decorationThickness: 2.0, // 두께 조절
+              decorationColor: isCompleted
+                  ? (isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600])
+                  : null, // 색상 조절
             ),
           ),
           subtitle: Column(
@@ -64,11 +79,15 @@ class TodoListItem extends StatelessWidget {
                 Text(
                   todo.description!,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600],
                     fontSize: 14,
                     decoration: isCompleted
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
+                    decorationThickness: 2.0,
+                    decorationColor: isCompleted
+                        ? (isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600])
+                        : null,
                   ),
                 ),
               // 우선순위, 마감일, 태그를 함께 표시

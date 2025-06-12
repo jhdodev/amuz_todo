@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 
-class SettingsMenuButton extends StatelessWidget {
+class SettingsMenuButton extends ConsumerWidget {
   const SettingsMenuButton({
     super.key,
     required this.title,
@@ -15,16 +17,20 @@ class SettingsMenuButton extends StatelessWidget {
   final Widget? trailingWidget;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
         width: double.infinity,
         child: Card(
-          color: Colors.white,
+          color: isDarkMode ? Color(0xFF181818) : Colors.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.grey.shade200, width: 1),
+            side: BorderSide(
+              color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+              width: 1,
+            ),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Padding(
@@ -38,18 +44,23 @@ class SettingsMenuButton extends StatelessWidget {
                           children: [
                             Text(
                               title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                                color: isDarkMode
+                                    ? Color(0xFFFAFAFA)
+                                    : Colors.black,
                               ),
                             ),
                             if (subtitle != null) ...[
                               const SizedBox(height: 4),
                               Text(
                                 subtitle!,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey,
+                                  color: isDarkMode
+                                      ? Color(0xFFA0A0A0)
+                                      : Colors.grey,
                                 ),
                               ),
                             ],
@@ -61,9 +72,10 @@ class SettingsMenuButton extends StatelessWidget {
                   )
                 : Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
                     ),
                   ),
           ),

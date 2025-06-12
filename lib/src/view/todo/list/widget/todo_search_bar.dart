@@ -1,7 +1,9 @@
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-class TodoSearchBar extends StatelessWidget {
+class TodoSearchBar extends ConsumerWidget {
   const TodoSearchBar({
     super.key,
     required this.controller,
@@ -14,17 +16,28 @@ class TodoSearchBar extends StatelessWidget {
   final VoidCallback onClearPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      cursorColor: Colors.black,
+      cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+      style: TextStyle(
+        color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+        fontSize: 16,
+      ),
       decoration: InputDecoration(
         hintText: "검색어를 입력하세요",
-        prefixIcon: const Icon(LucideIcons.search),
+        prefixIcon: Icon(
+          LucideIcons.search,
+          color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+        ),
         suffixIcon: IconButton(
           onPressed: onClearPressed,
-          icon: const Icon(LucideIcons.x),
+          icon: Icon(
+            LucideIcons.x,
+            color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -32,12 +45,17 @@ class TodoSearchBar extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: Color(0xFFE5E5E5), width: 1),
+          borderSide: BorderSide(
+            color: isDarkMode ? Color(0xFF1A1A1A) : Color(0xFFE5E5E5),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(
-            color: Colors.black.withValues(alpha: 0.4),
+            color: isDarkMode
+                ? Color(0xFF1A1A1A)
+                : Colors.black.withValues(alpha: 0.4),
             width: 3,
           ),
         ),

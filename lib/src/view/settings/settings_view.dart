@@ -6,6 +6,7 @@ import 'package:amuz_todo/src/view/settings/widget/profile_image_picker_action_s
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_model.dart';
 
 class SettingsView extends ConsumerWidget {
@@ -15,16 +16,24 @@ class SettingsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(settingsViewModelProvider);
     final currentUserAsync = ref.watch(currentUserProvider);
+    final isDarkMode = ref.watch(isDarkModeProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '설정',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -110,21 +119,28 @@ class SettingsView extends ConsumerWidget {
 
             /// 다크모드 스위치
             SettingsMenuButton(
-              title: false ? '다크 모드' : '라이트 모드',
+              title: isDarkMode ? '다크 모드' : '라이트 모드',
               subtitle: '다크 모드와 라이트 모드 전환',
               trailingWidget: Switch(
-                activeColor: Colors.black,
+                activeColor: Color(0xFF262B60),
                 activeTrackColor: Colors.white,
-                inactiveThumbColor: Colors.grey.shade200,
-                inactiveTrackColor: Colors.grey.shade200,
-                onChanged: (bool? value) {},
-                value: false,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Color(0xFFE5E5E5),
+                onChanged: (bool? value) {
+                  if (value != null) {
+                    ref.read(themeServiceProvider.notifier).setDarkMode(value);
+                  }
+                },
+                value: isDarkMode,
                 thumbIcon: WidgetStateProperty.resolveWith<Icon?>((
                   Set<WidgetState> states,
                 ) {
-                  return false
-                      ? const Icon(Icons.wb_sunny, color: Colors.amber)
-                      : const Icon(Icons.nightlight_round);
+                  return isDarkMode
+                      ? const Icon(
+                          Icons.nightlight_round,
+                          color: Color(0xFFFAA423),
+                        )
+                      : const Icon(Icons.wb_sunny, color: Colors.amber);
                 }),
               ),
             ),
@@ -163,7 +179,7 @@ class SettingsView extends ConsumerWidget {
             const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: isDarkMode ? Color(0xFF141414) : Colors.black,
                 minimumSize: const Size(double.infinity, 60),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),

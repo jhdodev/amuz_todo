@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:amuz_todo/src/model/priority.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_model.dart';
 import 'package:amuz_todo/src/view/todo/add/todo_add_view_state.dart';
 import 'package:amuz_todo/src/view/common/widget/image_picker_action_sheet.dart';
@@ -155,15 +156,24 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '할 일 추가',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -190,10 +200,10 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
+                    : Text(
                         '등록',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: isDarkMode ? Colors.white : Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -214,26 +224,41 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '제목',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _titleController,
-                  cursorColor: Colors.black,
+                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  style: TextStyle(
+                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    fontSize: 16,
+                  ),
                   decoration: InputDecoration(
                     hintText: "할 일을 입력해주세요.",
-                    border: OutlineInputBorder(
+                    hintStyle: TextStyle(
+                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                    ),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Color(0xFFE5E5E5),
+                        width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Colors.black.withValues(alpha: 0.4),
                         width: 3,
                       ),
                     ),
@@ -248,7 +273,11 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '설명',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -257,20 +286,33 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                     Expanded(
                       child: TextField(
                         controller: _descriptionController,
-                        cursorColor: Colors.black,
+                        cursorColor: isDarkMode
+                            ? Color(0xFFE5E5E5)
+                            : Colors.black,
+                        style: TextStyle(
+                          color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                          fontSize: 16,
+                        ),
                         decoration: InputDecoration(
                           hintText: "설명을 입력해주세요.",
-                          border: OutlineInputBorder(
+                          hintStyle: TextStyle(
+                            color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                          ),
+                          enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(
-                              color: Colors.grey.shade300,
-                              width: 2,
+                              color: isDarkMode
+                                  ? Color(0xFF1A1A1A)
+                                  : Color(0xFFE5E5E5),
+                              width: 1,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.4),
+                              color: isDarkMode
+                                  ? Color(0xFF1A1A1A)
+                                  : Colors.black.withValues(alpha: 0.4),
                               width: 3,
                             ),
                           ),
@@ -300,11 +342,15 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                             decoration: BoxDecoration(
                               color: hasImage
                                   ? Colors.transparent
-                                  : Colors.grey.shade200,
+                                  : (isDarkMode
+                                        ? Color(0xFF272727)
+                                        : Colors.grey.shade200),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 2,
+                                color: isDarkMode
+                                    ? Color(0xFF1A1A1A)
+                                    : Color(0xFFE5E5E5),
+                                width: 1,
                               ),
                             ),
                             child: isUploading
@@ -343,7 +389,11 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '태그',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -380,15 +430,22 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _tagController,
-                  cursorColor: Colors.black,
+                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  style: TextStyle(
+                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    fontSize: 16,
+                  ),
                   decoration: InputDecoration(
                     prefixText: '#',
                     prefixStyle: TextStyle(
-                      color: Colors.black,
+                      color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     hintText: "태그를 입력해주세요.",
+                    hintStyle: TextStyle(
+                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                    ),
                     suffixIcon: IconButton(
                       onPressed: () {
                         if (_tagController.text.trim().isNotEmpty) {
@@ -398,19 +455,26 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                           _tagController.clear();
                         }
                       },
-                      icon: const Icon(LucideIcons.plus),
+                      icon: Icon(
+                        LucideIcons.plus,
+                        color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      ),
                     ),
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Color(0xFFE5E5E5),
+                        width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Colors.black.withValues(alpha: 0.4),
                         width: 3,
                       ),
                     ),
@@ -425,7 +489,11 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '우선 순위',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -438,7 +506,12 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300, width: 2),
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Color(0xFFE5E5E5),
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -449,14 +522,16 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                               .watch(todoAddViewModelProvider)
                               .selectedPriority
                               .displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black,
+                            color: isDarkMode
+                                ? Color(0xFFFAFAFA)
+                                : Colors.black,
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.keyboard_arrow_down,
-                          color: Colors.grey,
+                          color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
                         ),
                       ],
                     ),
@@ -467,7 +542,11 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '마감일',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -486,8 +565,10 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                         ),
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                            color: isDarkMode
+                                ? Color(0xFF1A1A1A)
+                                : Color(0xFFE5E5E5),
+                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -501,13 +582,19 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color: dueDate != null
-                                    ? Colors.black
-                                    : Colors.grey,
+                                    ? (isDarkMode
+                                          ? Color(0xFFFAFAFA)
+                                          : Colors.black)
+                                    : (isDarkMode
+                                          ? Color(0xFFA0A0A0)
+                                          : Colors.grey),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.calendar_today,
-                              color: Colors.grey,
+                              color: isDarkMode
+                                  ? Color(0xFFA0A0A0)
+                                  : Colors.grey,
                             ),
                           ],
                         ),

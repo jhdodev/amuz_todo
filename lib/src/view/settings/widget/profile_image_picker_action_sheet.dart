@@ -27,7 +27,10 @@ class ProfileImagePickerActionSheet extends StatelessWidget {
             Navigator.pop(context);
             onGalleryTap();
           },
-          child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
+          child: const Text(
+            '갤러리에서 사진 선택',
+            style: TextStyle(fontSize: 16, color: Color(0xFF057AFF)),
+          ),
         ),
 
         // 기본 이미지로 변경
@@ -39,7 +42,7 @@ class ProfileImagePickerActionSheet extends StatelessWidget {
             },
             child: const Text(
               '기본 이미지로 변경',
-              style: TextStyle(fontSize: 16, color: Colors.red),
+              style: TextStyle(fontSize: 16, color: Colors.black),
             ),
           ),
       ],
@@ -47,7 +50,11 @@ class ProfileImagePickerActionSheet extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
         child: const Text(
           '취소',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.red,
+          ),
         ),
       ),
     );

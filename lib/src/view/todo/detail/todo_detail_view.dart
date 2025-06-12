@@ -1,3 +1,4 @@
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_model.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_state.dart';
 import 'package:amuz_todo/src/view/common/widget/image_picker_action_sheet.dart';
@@ -109,6 +110,8 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer(
@@ -119,13 +122,20 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
             return Text(
               detailState.todo?.title ?? '',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
             );
           },
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -162,10 +172,10 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
+                    : Text(
                         '수정',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: isDarkMode ? Colors.white : Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -186,7 +196,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '제목',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -203,20 +217,33 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
                     return TextField(
                       controller: _titleController,
-                      cursorColor: Colors.black,
+                      cursorColor: isDarkMode
+                          ? Color(0xFFE5E5E5)
+                          : Colors.black,
+                      style: TextStyle(
+                        color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: "할 일을 입력해주세요.",
-                        border: OutlineInputBorder(
+                        hintStyle: TextStyle(
+                          color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                        ),
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                            color: isDarkMode
+                                ? Color(0xFF1A1A1A)
+                                : Color(0xFFE5E5E5),
+                            width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: isDarkMode
+                                ? Color(0xFF1A1A1A)
+                                : Colors.black.withValues(alpha: 0.4),
                             width: 3,
                           ),
                         ),
@@ -233,7 +260,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '설명',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -254,20 +285,37 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
                           return TextField(
                             controller: _descriptionController,
-                            cursorColor: Colors.black,
+                            cursorColor: isDarkMode
+                                ? Color(0xFFE5E5E5)
+                                : Colors.black,
+                            style: TextStyle(
+                              color: isDarkMode
+                                  ? Color(0xFFFAFAFA)
+                                  : Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: InputDecoration(
                               hintText: "설명을 입력해주세요.",
-                              border: OutlineInputBorder(
+                              hintStyle: TextStyle(
+                                color: isDarkMode
+                                    ? Color(0xFFA0A0A0)
+                                    : Colors.grey,
+                              ),
+                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                  width: 2,
+                                  color: isDarkMode
+                                      ? Color(0xFF1A1A1A)
+                                      : Color(0xFFE5E5E5),
+                                  width: 1,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(
-                                  color: Colors.black.withValues(alpha: 0.4),
+                                  color: isDarkMode
+                                      ? Color(0xFF1A1A1A)
+                                      : Colors.black.withValues(alpha: 0.4),
                                   width: 3,
                                 ),
                               ),
@@ -304,11 +352,15 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                             decoration: BoxDecoration(
                               color: hasAnyImage
                                   ? Colors.transparent
-                                  : Colors.grey.shade200,
+                                  : (isDarkMode
+                                        ? Color(0xFF272727)
+                                        : Colors.grey.shade200),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 2,
+                                color: isDarkMode
+                                    ? Color(0xFF1A1A1A)
+                                    : Color(0xFFE5E5E5),
+                                width: 1,
                               ),
                             ),
                             child: isUploading
@@ -365,7 +417,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '태그',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -408,15 +464,22 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _tagController,
-                  cursorColor: Colors.black,
+                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  style: TextStyle(
+                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    fontSize: 16,
+                  ),
                   decoration: InputDecoration(
                     prefixText: '#',
-                    prefixStyle: const TextStyle(
-                      color: Colors.black,
+                    prefixStyle: TextStyle(
+                      color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     hintText: "태그를 입력해주세요.",
+                    hintStyle: TextStyle(
+                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                    ),
                     suffixIcon: IconButton(
                       onPressed: () {
                         if (_tagController.text.trim().isNotEmpty) {
@@ -430,19 +493,26 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                           _tagController.clear();
                         }
                       },
-                      icon: const Icon(LucideIcons.plus),
+                      icon: Icon(
+                        LucideIcons.plus,
+                        color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      ),
                     ),
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Color(0xFFE5E5E5),
+                        width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Colors.black.withValues(alpha: 0.4),
                         width: 3,
                       ),
                     ),
@@ -457,7 +527,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '우선 순위',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -470,7 +544,15 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300, width: 2),
+                      color: isDarkMode
+                          ? Colors.transparent
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Color(0xFF1A1A1A)
+                            : Color(0xFFE5E5E5),
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -481,14 +563,16 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                               .watch(todoDetailViewModelProvider(widget.todoId))
                               .selectedPriority
                               .displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black,
+                            color: isDarkMode
+                                ? Color(0xFFFAFAFA)
+                                : Colors.black,
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.keyboard_arrow_down,
-                          color: Colors.grey,
+                          color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
                         ),
                       ],
                     ),
@@ -499,7 +583,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '마감일',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -519,9 +607,14 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                           vertical: 16,
                         ),
                         decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.transparent
+                              : Colors.transparent,
                           border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                            color: isDarkMode
+                                ? Color(0xFF1A1A1A)
+                                : Color(0xFFE5E5E5),
+                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -535,13 +628,19 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color: dueDate != null
-                                    ? Colors.black
-                                    : Colors.grey,
+                                    ? (isDarkMode
+                                          ? Color(0xFFFAFAFA)
+                                          : Colors.black)
+                                    : (isDarkMode
+                                          ? Color(0xFFA0A0A0)
+                                          : Colors.grey),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.calendar_today,
-                              color: Colors.grey,
+                              color: isDarkMode
+                                  ? Color(0xFFA0A0A0)
+                                  : Colors.grey,
                             ),
                           ],
                         ),

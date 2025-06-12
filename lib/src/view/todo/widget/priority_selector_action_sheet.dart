@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class PrioritySelectorActionSheet extends StatelessWidget {
   const PrioritySelectorActionSheet({
@@ -22,26 +23,26 @@ class PrioritySelectorActionSheet extends StatelessWidget {
             Navigator.pop(context);
             onPrioritySelected(Priority.high);
           },
-          child: const Text('높음'),
+          child: const Text('높음', style: TextStyle(color: Color(0xFF057AFF))),
         ),
         CupertinoActionSheetAction(
           onPressed: () {
             Navigator.pop(context);
             onPrioritySelected(Priority.medium);
           },
-          child: const Text('보통'),
+          child: const Text('보통', style: TextStyle(color: Color(0xFF057AFF))),
         ),
         CupertinoActionSheetAction(
           onPressed: () {
             Navigator.pop(context);
             onPrioritySelected(Priority.low);
           },
-          child: const Text('낮음'),
+          child: const Text('낮음', style: TextStyle(color: Color(0xFF057AFF))),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(
         onPressed: () => Navigator.pop(context),
-        child: const Text('취소'),
+        child: const Text('취소', style: TextStyle(color: Colors.red)),
       ),
     );
   }

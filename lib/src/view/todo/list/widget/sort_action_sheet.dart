@@ -33,13 +33,13 @@ class SortActionSheet extends StatelessWidget {
               Text(
                 _getSortDisplayName(option),
                 style: TextStyle(
-                  color: isSelected ? Colors.blue : Colors.black,
+                  color: isSelected ? Color(0xFF057AFF) : Colors.black,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
               if (isSelected) ...[
                 SizedBox(width: 8),
-                Icon(LucideIcons.check, size: 16, color: Colors.blue),
+                Icon(LucideIcons.check, size: 16, color: Color(0xFF057AFF)),
               ],
             ],
           ),
@@ -48,7 +48,7 @@ class SortActionSheet extends StatelessWidget {
       cancelButton: CupertinoActionSheetAction(
         onPressed: () => Navigator.pop(context),
         isDefaultAction: true,
-        child: Text('취소'),
+        child: Text('취소', style: TextStyle(color: Colors.red)),
       ),
     );
   }
