@@ -51,19 +51,14 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     state = state.copyWith(status: TodoListViewStatus.loading);
 
     try {
-      // 병렬로 데이터 가져오기
-      final futures = await Future.wait([
-        _todoRepository.getTodos(),
-        _todoRepository.getUserTags(),
-      ]);
-
-      final todos = futures[0] as List<dynamic>;
-      final userTags = futures[1] as List<dynamic>;
+      // 개별 호출로 타입 안전성 확보
+      final todos = await _todoRepository.getTodos();
+      final userTags = await _todoRepository.getUserTags();
 
       state = state.copyWith(
         status: TodoListViewStatus.success,
-        todos: todos.cast(),
-        userTags: userTags.cast(),
+        todos: todos,
+        userTags: userTags,
       );
 
       // 초기 필터링 적용
@@ -80,7 +75,9 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
   Future<void> refreshTodos() async {
     try {
       final todos = await _todoRepository.getTodos();
-      state = state.copyWith(todos: todos);
+      final userTags = await _todoRepository.getUserTags();
+
+      state = state.copyWith(todos: todos, userTags: userTags);
       _applyFiltersAndSort(); // 새로고침 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
