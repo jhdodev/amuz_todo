@@ -67,96 +67,99 @@ class _TodoListViewState extends ConsumerState<TodoListView> {
         ),
         actions: [UserProfileHeader(userAsync: currentUserAsync)],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 6),
-            TodoSearchBar(
-              controller: _searchController,
-              onChanged: (value) => ref
-                  .read(todoListViewModelProvider.notifier)
-                  .setSearchQuery(value),
-              onClearPressed: () {
-                _searchController.clear();
-                ref.read(todoListViewModelProvider.notifier).clearSearch();
-              },
-            ),
-            const SizedBox(height: 20),
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 6),
+              TodoSearchBar(
+                controller: _searchController,
+                onChanged: (value) => ref
+                    .read(todoListViewModelProvider.notifier)
+                    .setSearchQuery(value),
+                onClearPressed: () {
+                  _searchController.clear();
+                  ref.read(todoListViewModelProvider.notifier).clearSearch();
+                },
+              ),
+              const SizedBox(height: 20),
 
-            // 필터 버튼들
-            FilterButtonsRow(
-              completionFilter: todoListState.completionFilter,
-              selectedTags: todoListState.selectedTags,
-              userTags: todoListState.userTags,
-              onCompletionFilterChanged: (filter) => ref
-                  .read(todoListViewModelProvider.notifier)
-                  .setCompletionFilter(filter),
-              onTagFilterToggled: (tagName) => ref
-                  .read(todoListViewModelProvider.notifier)
-                  .toggleTagFilter(tagName),
-            ),
-            const SizedBox(height: 20),
+              // 필터 버튼들
+              FilterButtonsRow(
+                completionFilter: todoListState.completionFilter,
+                selectedTags: todoListState.selectedTags,
+                userTags: todoListState.userTags,
+                onCompletionFilterChanged: (filter) => ref
+                    .read(todoListViewModelProvider.notifier)
+                    .setCompletionFilter(filter),
+                onTagFilterToggled: (tagName) => ref
+                    .read(todoListViewModelProvider.notifier)
+                    .toggleTagFilter(tagName),
+              ),
+              const SizedBox(height: 20),
 
-            Expanded(
-              child: todoListState.status == TodoListViewStatus.loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : todoListState.status == TodoListViewStatus.error
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text('오류가 발생했습니다: ${todoListState.errorMessage}'),
-                          TextButton(
-                            onPressed: () => ref
-                                .read(todoListViewModelProvider.notifier)
-                                .loadInitialData(),
-                            child: const Text('다시 시도'),
-                          ),
-                        ],
-                      ),
-                    )
-                  : todoListState.filteredTodos.isEmpty
-                  ? const Center(
-                      child: Text(
-                        '조건에 맞는 할 일이 없습니다.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: todoListState.filteredTodos.length,
-                      itemBuilder: (context, index) {
-                        final todo = todoListState.filteredTodos[index];
-                        return TodoListItem(
-                          todo: todo,
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    TodoDetailView(todoId: todo.id),
-                              ),
-                            );
-
-                            // 상세 페이지에서 돌아왔을 때 목록 새로고침
-                            if (result == true) {
-                              ref
+              Expanded(
+                child: todoListState.status == TodoListViewStatus.loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : todoListState.status == TodoListViewStatus.error
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('오류가 발생했습니다: ${todoListState.errorMessage}'),
+                            TextButton(
+                              onPressed: () => ref
                                   .read(todoListViewModelProvider.notifier)
-                                  .refreshTodos();
-                            }
-                          },
-                          onToggleCompletion: (value) => ref
-                              .read(todoListViewModelProvider.notifier)
-                              .toggleTodoCompletion(todo.id, value),
-                          onDelete: () => ref
-                              .read(todoListViewModelProvider.notifier)
-                              .deleteTodo(todo.id),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                                  .loadInitialData(),
+                              child: const Text('다시 시도'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : todoListState.filteredTodos.isEmpty
+                    ? const Center(
+                        child: Text(
+                          '조건에 맞는 할 일이 없습니다.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: todoListState.filteredTodos.length,
+                        itemBuilder: (context, index) {
+                          final todo = todoListState.filteredTodos[index];
+                          return TodoListItem(
+                            todo: todo,
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      TodoDetailView(todoId: todo.id),
+                                ),
+                              );
+
+                              // 상세 페이지에서 돌아왔을 때 목록 새로고침
+                              if (result == true) {
+                                ref
+                                    .read(todoListViewModelProvider.notifier)
+                                    .refreshTodos();
+                              }
+                            },
+                            onToggleCompletion: (value) => ref
+                                .read(todoListViewModelProvider.notifier)
+                                .toggleTodoCompletion(todo.id, value),
+                            onDelete: () => ref
+                                .read(todoListViewModelProvider.notifier)
+                                .deleteTodo(todo.id),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
