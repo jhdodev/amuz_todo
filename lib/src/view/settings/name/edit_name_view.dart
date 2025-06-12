@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/view/settings/name/edit_name_view_state.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/view/settings/name/edit_name_view_model.dart';
@@ -87,27 +88,27 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                 TextFormField(
                   controller: _nameController,
                   enabled: !state.isLoading,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     hintText: '이름',
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     prefixIcon: Icon(
                       LucideIcons.user,
                       size: 20,
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.black,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -115,8 +116,8 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -178,7 +179,7 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                   onPressed: state.isLoading ? null : _updateName,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDarkMode
-                        ? Color(0xFFE5E5E5)
+                        ? AppColors.lightGrey
                         : Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

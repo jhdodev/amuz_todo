@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/settings/password/change_password_view_model.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 
 class ChangePasswordView extends ConsumerStatefulWidget {
   const ChangePasswordView({super.key});
@@ -74,27 +75,27 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                 TextFormField(
                   controller: _currentPasswordController,
                   obscureText: true,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     hintText: '현재 비밀번호',
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     prefixIcon: Icon(
                       LucideIcons.lock,
                       size: 20,
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.black,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -102,8 +103,8 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -124,27 +125,27 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                 TextFormField(
                   controller: _newPasswordController,
                   obscureText: true,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     hintText: '새 비밀번호',
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     prefixIcon: Icon(
                       LucideIcons.lock,
                       size: 20,
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.black,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -152,8 +153,8 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -177,27 +178,27 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     hintText: '새 비밀번호 확인',
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     prefixIcon: Icon(
                       LucideIcons.lock,
                       size: 20,
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.black,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -205,8 +206,8 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -272,7 +273,7 @@ class _ChangePasswordViewState extends ConsumerState<ChangePasswordView> {
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDarkMode
-                        ? Color(0xFFE5E5E5)
+                        ? AppColors.lightGrey
                         : Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

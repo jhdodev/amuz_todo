@@ -1,4 +1,5 @@
 import 'package:amuz_todo/src/model/priority.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -23,21 +24,30 @@ class PrioritySelectorActionSheet extends StatelessWidget {
             Navigator.pop(context);
             onPrioritySelected(Priority.high);
           },
-          child: const Text('높음', style: TextStyle(color: Color(0xFF057AFF))),
+          child: const Text(
+            '높음',
+            style: TextStyle(color: AppColors.actionSheetBlue),
+          ),
         ),
         CupertinoActionSheetAction(
           onPressed: () {
             Navigator.pop(context);
             onPrioritySelected(Priority.medium);
           },
-          child: const Text('보통', style: TextStyle(color: Color(0xFF057AFF))),
+          child: const Text(
+            '보통',
+            style: TextStyle(color: AppColors.actionSheetBlue),
+          ),
         ),
         CupertinoActionSheetAction(
           onPressed: () {
             Navigator.pop(context);
             onPrioritySelected(Priority.low);
           },
-          child: const Text('낮음', style: TextStyle(color: Color(0xFF057AFF))),
+          child: const Text(
+            '낮음',
+            style: TextStyle(color: AppColors.actionSheetBlue),
+          ),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(

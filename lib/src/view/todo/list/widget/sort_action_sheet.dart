@@ -1,7 +1,8 @@
 import 'package:amuz_todo/src/view/todo/list/todo_list_view_state.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 class SortActionSheet extends StatelessWidget {
   const SortActionSheet({
@@ -33,13 +34,17 @@ class SortActionSheet extends StatelessWidget {
               Text(
                 _getSortDisplayName(option),
                 style: TextStyle(
-                  color: isSelected ? Color(0xFF057AFF) : Colors.black,
+                  color: isSelected ? AppColors.actionSheetBlue : Colors.black,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
               if (isSelected) ...[
-                SizedBox(width: 8),
-                Icon(LucideIcons.check, size: 16, color: Color(0xFF057AFF)),
+                const SizedBox(width: 8),
+                const Icon(
+                  LucideIcons.check,
+                  size: 16,
+                  color: AppColors.actionSheetBlue,
+                ),
               ],
             ],
           ),

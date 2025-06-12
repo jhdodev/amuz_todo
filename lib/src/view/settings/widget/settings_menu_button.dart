@@ -1,6 +1,7 @@
+import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:amuz_todo/src/service/theme_service.dart';
 
 class SettingsMenuButton extends ConsumerWidget {
   const SettingsMenuButton({
@@ -24,11 +25,11 @@ class SettingsMenuButton extends ConsumerWidget {
       child: SizedBox(
         width: double.infinity,
         child: Card(
-          color: isDarkMode ? Color(0xFF181818) : Colors.white,
+          color: isDarkMode ? AppColors.cardGrey : Colors.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+              color: isDarkMode ? AppColors.darkGrey : Colors.grey.shade200,
               width: 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -48,7 +49,7 @@ class SettingsMenuButton extends ConsumerWidget {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                                 color: isDarkMode
-                                    ? Color(0xFFFAFAFA)
+                                    ? AppColors.almostWhite
                                     : Colors.black,
                               ),
                             ),
@@ -59,7 +60,7 @@ class SettingsMenuButton extends ConsumerWidget {
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: isDarkMode
-                                      ? Color(0xFFA0A0A0)
+                                      ? AppColors.mediumGrey
                                       : Colors.grey,
                                 ),
                               ),
@@ -75,7 +76,7 @@ class SettingsMenuButton extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                      color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     ),
                   ),
           ),

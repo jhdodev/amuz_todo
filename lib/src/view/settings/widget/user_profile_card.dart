@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/model/user.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -25,11 +26,11 @@ class UserProfileCard extends ConsumerWidget {
     return SizedBox(
       width: double.infinity,
       child: Card(
-        color: isDarkMode ? Color(0xFF181818) : Colors.white,
+        color: isDarkMode ? AppColors.cardGrey : Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+            color: isDarkMode ? AppColors.darkGrey : Colors.grey.shade200,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(14),
@@ -78,11 +79,13 @@ class UserProfileCard extends ConsumerWidget {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                          color: isDarkMode
+                              ? AppColors.lightGrey
+                              : Colors.black,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isDarkMode
-                                ? Color(0xFF181818)
+                                ? AppColors.cardGrey
                                 : Colors.white,
                             width: 2,
                           ),
@@ -106,7 +109,7 @@ class UserProfileCard extends ConsumerWidget {
                   height: 20,
                   decoration: BoxDecoration(
                     color: isDarkMode
-                        ? Color(0xFF272727)
+                        ? AppColors.darkGrey
                         : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -117,7 +120,7 @@ class UserProfileCard extends ConsumerWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                   ),
                 ),
 
@@ -129,7 +132,7 @@ class UserProfileCard extends ConsumerWidget {
                   height: 16,
                   decoration: BoxDecoration(
                     color: isDarkMode
-                        ? Color(0xFF272727)
+                        ? AppColors.darkGrey
                         : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -139,7 +142,7 @@ class UserProfileCard extends ConsumerWidget {
                   user?.email ?? 'default@example.com',
                   style: TextStyle(
                     fontSize: 14,
-                    color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                    color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                   ),
                 ),
             ],

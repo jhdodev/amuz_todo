@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_model.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 
 class SettingsView extends ConsumerWidget {
   const SettingsView({super.key});
@@ -122,10 +123,10 @@ class SettingsView extends ConsumerWidget {
               title: isDarkMode ? '다크 모드' : '라이트 모드',
               subtitle: '다크 모드와 라이트 모드 전환',
               trailingWidget: Switch(
-                activeColor: Color(0xFF262B60),
+                activeColor: AppColors.switchActiveBlue,
                 activeTrackColor: Colors.white,
                 inactiveThumbColor: Colors.white,
-                inactiveTrackColor: Color(0xFFE5E5E5),
+                inactiveTrackColor: AppColors.lightGrey,
                 onChanged: (bool? value) {
                   if (value != null) {
                     ref.read(themeServiceProvider.notifier).setDarkMode(value);
@@ -138,7 +139,7 @@ class SettingsView extends ConsumerWidget {
                   return isDarkMode
                       ? const Icon(
                           Icons.nightlight_round,
-                          color: Color(0xFFFAA423),
+                          color: AppColors.sunYellow,
                         )
                       : const Icon(Icons.wb_sunny, color: Colors.amber);
                 }),
@@ -147,7 +148,9 @@ class SettingsView extends ConsumerWidget {
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.white,
+                backgroundColor: isDarkMode
+                    ? AppColors.lightGrey
+                    : Colors.white,
                 minimumSize: const Size(double.infinity, 60),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),
@@ -179,7 +182,9 @@ class SettingsView extends ConsumerWidget {
             const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkMode ? Color(0xFF141414) : Colors.black,
+                backgroundColor: isDarkMode
+                    ? AppColors.darkestGrey
+                    : Colors.black,
                 minimumSize: const Size(double.infinity, 60),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),

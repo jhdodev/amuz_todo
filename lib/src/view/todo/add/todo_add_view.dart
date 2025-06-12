@@ -10,6 +10,7 @@ import 'package:amuz_todo/src/view/todo/widget/priority_selector_action_sheet.da
 import 'package:amuz_todo/src/view/todo/widget/todo_date_picker_dialog.dart';
 import 'package:amuz_todo/src/view/todo/widget/tag_widget.dart';
 import 'package:amuz_todo/src/view/todo/add/widget/draft_confirmation_dialog.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -234,22 +235,22 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 const SizedBox(height: 10),
                 TextField(
                   controller: _titleController,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     hintText: "할 일을 입력해주세요.",
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -257,8 +258,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -300,23 +301,27 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       child: TextField(
                         controller: _descriptionController,
                         cursorColor: isDarkMode
-                            ? Color(0xFFE5E5E5)
+                            ? AppColors.lightGrey
                             : Colors.black,
                         style: TextStyle(
-                          color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                          color: isDarkMode
+                              ? AppColors.almostWhite
+                              : Colors.black,
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
                           hintText: "설명을 입력해주세요.",
                           hintStyle: TextStyle(
-                            color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                            color: isDarkMode
+                                ? AppColors.mediumGrey
+                                : Colors.grey,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(
                               color: isDarkMode
-                                  ? Color(0xFF1A1A1A)
-                                  : Color(0xFFE5E5E5),
+                                  ? AppColors.almostBlack
+                                  : AppColors.lightGrey,
                               width: 1,
                             ),
                           ),
@@ -324,8 +329,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                             borderRadius: BorderRadius.circular(14),
                             borderSide: BorderSide(
                               color: isDarkMode
-                                  ? Color(0xFF1A1A1A)
-                                  : Colors.black.withValues(alpha: 0.4),
+                                  ? AppColors.almostBlack
+                                  : Colors.black.withOpacity(0.4),
                               width: 3,
                             ),
                           ),
@@ -356,13 +361,13 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                               color: hasImage
                                   ? Colors.transparent
                                   : (isDarkMode
-                                        ? Color(0xFF272727)
+                                        ? AppColors.darkGrey
                                         : Colors.grey.shade200),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
                                 color: isDarkMode
-                                    ? Color(0xFF1A1A1A)
-                                    : Color(0xFFE5E5E5),
+                                    ? AppColors.almostBlack
+                                    : AppColors.lightGrey,
                                 width: 1,
                               ),
                             ),
@@ -469,21 +474,21 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _tagController,
-                  cursorColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
                     prefixText: '#',
                     prefixStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFFAFAFA) : Colors.black,
+                      color: isDarkMode ? AppColors.almostWhite : Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     hintText: "태그를 입력해주세요.",
                     hintStyle: TextStyle(
-                      color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
                     ),
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -496,15 +501,15 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       },
                       icon: Icon(
                         LucideIcons.plus,
-                        color: isDarkMode ? Color(0xFFA0A0A0) : Colors.black,
+                        color: isDarkMode ? AppColors.mediumGrey : Colors.black,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                     ),
@@ -512,8 +517,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Colors.black.withValues(alpha: 0.4),
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -547,8 +552,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: isDarkMode
-                            ? Color(0xFF1A1A1A)
-                            : Color(0xFFE5E5E5),
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(14),
@@ -564,13 +569,15 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                           style: TextStyle(
                             fontSize: 16,
                             color: isDarkMode
-                                ? Color(0xFFFAFAFA)
+                                ? AppColors.almostWhite
                                 : Colors.black,
                           ),
                         ),
                         Icon(
                           Icons.keyboard_arrow_down,
-                          color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey,
+                          color: isDarkMode
+                              ? AppColors.mediumGrey
+                              : Colors.grey,
                         ),
                       ],
                     ),
@@ -605,8 +612,8 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: isDarkMode
-                                ? Color(0xFF1A1A1A)
-                                : Color(0xFFE5E5E5),
+                                ? AppColors.almostBlack
+                                : AppColors.lightGrey,
                             width: 1,
                           ),
                           borderRadius: BorderRadius.circular(14),
@@ -622,17 +629,17 @@ class _TodoAddViewState extends ConsumerState<TodoAddView> {
                                 fontSize: 16,
                                 color: dueDate != null
                                     ? (isDarkMode
-                                          ? Color(0xFFFAFAFA)
+                                          ? AppColors.almostWhite
                                           : Colors.black)
                                     : (isDarkMode
-                                          ? Color(0xFFA0A0A0)
+                                          ? AppColors.mediumGrey
                                           : Colors.grey),
                               ),
                             ),
                             Icon(
                               Icons.calendar_today,
                               color: isDarkMode
-                                  ? Color(0xFFA0A0A0)
+                                  ? AppColors.mediumGrey
                                   : Colors.grey,
                             ),
                           ],

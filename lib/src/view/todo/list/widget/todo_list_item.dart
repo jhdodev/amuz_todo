@@ -1,6 +1,7 @@
 import 'package:amuz_todo/src/model/priority.dart';
 import 'package:amuz_todo/src/model/todo.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -26,11 +27,11 @@ class TodoListItem extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Card(
-        color: isDarkMode ? Color(0xFF181818) : Colors.white,
+        color: isDarkMode ? AppColors.cardGrey : Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: isDarkMode ? Color(0xFF272727) : Colors.grey.shade200,
+            color: isDarkMode ? AppColors.darkGrey : Colors.grey.shade200,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(14),
@@ -41,8 +42,8 @@ class TodoListItem extends ConsumerWidget {
             scale: 1.2,
             child: Checkbox(
               value: isCompleted,
-              activeColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.black,
-              checkColor: isDarkMode ? Color(0xFF181818) : Colors.white,
+              activeColor: isDarkMode ? AppColors.lightGrey : Colors.black,
+              checkColor: isDarkMode ? AppColors.cardGrey : Colors.white,
               side: BorderSide(color: Colors.grey.shade400, width: 1.0),
               onChanged: (bool? value) {
                 if (value != null) {
@@ -58,17 +59,17 @@ class TodoListItem extends ConsumerWidget {
               fontSize: 16,
               color: isCompleted
                   ? isDarkMode
-                        ? Color(0xFFA0A0A0)
+                        ? AppColors.mediumGrey
                         : Colors.grey[600]
                   : isDarkMode
-                  ? Color(0xFFFAFAFA)
+                  ? AppColors.almostWhite
                   : Colors.black,
               decoration: isCompleted
                   ? TextDecoration.lineThrough
                   : TextDecoration.none,
               decorationThickness: 2.0, // 두께 조절
               decorationColor: isCompleted
-                  ? (isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600])
+                  ? (isDarkMode ? AppColors.mediumGrey : Colors.grey[600])
                   : null, // 색상 조절
             ),
           ),
@@ -79,14 +80,14 @@ class TodoListItem extends ConsumerWidget {
                 Text(
                   todo.description!,
                   style: TextStyle(
-                    color: isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600],
+                    color: isDarkMode ? AppColors.mediumGrey : Colors.grey[600],
                     fontSize: 14,
                     decoration: isCompleted
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
                     decorationThickness: 2.0,
                     decorationColor: isCompleted
-                        ? (isDarkMode ? Color(0xFFA0A0A0) : Colors.grey[600])
+                        ? (isDarkMode ? AppColors.mediumGrey : Colors.grey[600])
                         : null,
                   ),
                 ),

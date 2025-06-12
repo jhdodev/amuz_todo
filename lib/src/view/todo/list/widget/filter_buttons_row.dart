@@ -1,5 +1,6 @@
 import 'package:amuz_todo/src/model/tag.dart';
 import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -67,14 +68,14 @@ class FilterButtonsRow extends ConsumerWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? isDarkMode
-                    ? Color(0xFFE5E5E5)
+                    ? AppColors.lightGrey
                     : Colors.black
               : isDarkMode
-              ? Color(0xFF161616)
+              ? AppColors.darkerGrey
               : Colors.white,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: isDarkMode ? Color(0xFF424242) : Colors.grey.shade300,
+            color: isDarkMode ? AppColors.mediumDarkGrey : Colors.grey.shade300,
             width: 1,
           ),
         ),
@@ -86,7 +87,7 @@ class FilterButtonsRow extends ConsumerWidget {
                       ? Colors.black
                       : Colors.white
                 : isDarkMode
-                ? Color(0xFFFAFAFA)
+                ? AppColors.almostWhite
                 : Colors.black,
             fontWeight: FontWeight.w500,
             fontSize: 16,
@@ -111,14 +112,14 @@ class FilterButtonsRow extends ConsumerWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? isDarkMode
-                    ? Color(0xFFE5E5E5)
+                    ? AppColors.lightGrey
                     : Colors.black
               : isDarkMode
-              ? Color(0xFF161616)
+              ? AppColors.darkerGrey
               : Colors.white,
           borderRadius: BorderRadius.circular(25),
           border: Border.all(
-            color: isDarkMode ? Color(0xFF424242) : Colors.grey.shade300,
+            color: isDarkMode ? AppColors.mediumDarkGrey : Colors.grey.shade300,
             width: 1,
           ),
         ),
@@ -130,7 +131,7 @@ class FilterButtonsRow extends ConsumerWidget {
                       ? Colors.black
                       : Colors.white
                 : isDarkMode
-                ? Color(0xFFFAFAFA)
+                ? AppColors.almostWhite
                 : Colors.black,
             fontWeight: FontWeight.w500,
             fontSize: 16,

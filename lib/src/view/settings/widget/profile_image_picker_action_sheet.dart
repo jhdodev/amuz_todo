@@ -1,3 +1,4 @@
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +30,7 @@ class ProfileImagePickerActionSheet extends StatelessWidget {
           },
           child: const Text(
             '갤러리에서 사진 선택',
-            style: TextStyle(fontSize: 16, color: Color(0xFF057AFF)),
+            style: TextStyle(fontSize: 16, color: AppColors.actionSheetBlue),
           ),
         ),
 
