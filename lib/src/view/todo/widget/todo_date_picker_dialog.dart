@@ -1,3 +1,4 @@
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -63,7 +64,10 @@ class _TodoDatePickerDialogState extends State<TodoDatePickerDialog> {
                 children: [
                   CupertinoButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('취소'),
+                    child: const Text(
+                      '취소',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                   const Text(
                     '마감일 선택',
@@ -79,7 +83,10 @@ class _TodoDatePickerDialogState extends State<TodoDatePickerDialog> {
                       widget.onDateSelected(tempDate);
                       Navigator.pop(context);
                     },
-                    child: const Text('완료'),
+                    child: const Text(
+                      '완료',
+                      style: TextStyle(color: AppColors.actionSheetBlue),
+                    ),
                   ),
                 ],
               ),
@@ -94,7 +101,10 @@ class _TodoDatePickerDialogState extends State<TodoDatePickerDialog> {
                 },
                 child: const Text(
                   '마감일 제거',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
                 ),
               ),
             ),

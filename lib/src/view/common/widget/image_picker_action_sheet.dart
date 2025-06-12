@@ -1,3 +1,4 @@
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -19,14 +20,21 @@ class ImagePickerActionSheet extends StatelessWidget {
             Navigator.pop(context);
             onGalleryTap();
           },
-          child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
+          child: const Text(
+            '갤러리에서 사진 선택',
+            style: TextStyle(fontSize: 16, color: AppColors.actionSheetBlue),
+          ),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(
         onPressed: () => Navigator.pop(context),
         child: const Text(
           '취소',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.red,
+          ),
         ),
       ),
     );
