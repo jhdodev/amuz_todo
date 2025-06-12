@@ -147,7 +147,7 @@ class SettingsView extends ConsumerWidget {
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: isDarkMode ? Color(0xFFE5E5E5) : Colors.white,
                 minimumSize: const Size(double.infinity, 60),
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(14)),
