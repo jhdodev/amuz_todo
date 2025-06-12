@@ -16,9 +16,34 @@ final todoRepositoryProvider = Provider<TodoRepository>((ref) {
 
 class TodoListViewModel extends StateNotifier<TodoListViewState> {
   final TodoRepository _todoRepository;
+  final Ref _ref;
 
-  TodoListViewModel(this._todoRepository) : super(const TodoListViewState()) {
-    loadInitialData();
+  TodoListViewModel(this._todoRepository, this._ref)
+    : super(const TodoListViewState()) {
+    // 사용자 상태 변화 감지
+    _ref.listen(currentUserProvider, (previous, next) {
+      if (previous != next) {
+        if (next.hasValue && next.value != null) {
+          // 새로운 사용자로 로그인 시 데이터 로드
+          loadInitialData();
+        } else {
+          // 로그아웃 시 상태 초기화
+          _resetState();
+        }
+      }
+    });
+
+    // 초기 데이터 로딩은 사용자가 있을 때만
+    final currentUser = _ref.read(currentUserProvider);
+    if (currentUser.hasValue && currentUser.value != null) {
+      loadInitialData();
+    }
+  }
+
+  // 상태 초기화
+  void _resetState() {
+    print('🔥 TodoListViewModel: 상태 초기화');
+    state = const TodoListViewState();
   }
 
   // 초기 데이터 로딩
@@ -26,19 +51,14 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
     state = state.copyWith(status: TodoListViewStatus.loading);
 
     try {
-      // 병렬로 데이터 가져오기
-      final futures = await Future.wait([
-        _todoRepository.getTodos(),
-        _todoRepository.getUserTags(),
-      ]);
-
-      final todos = futures[0] as List<dynamic>;
-      final userTags = futures[1] as List<dynamic>;
+      // 개별 호출로 타입 안전성 확보
+      final todos = await _todoRepository.getTodos();
+      final userTags = await _todoRepository.getUserTags();
 
       state = state.copyWith(
         status: TodoListViewStatus.success,
-        todos: todos.cast(),
-        userTags: userTags.cast(),
+        todos: todos,
+        userTags: userTags,
       );
 
       // 초기 필터링 적용
@@ -55,7 +75,9 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
   Future<void> refreshTodos() async {
     try {
       final todos = await _todoRepository.getTodos();
-      state = state.copyWith(todos: todos);
+      final userTags = await _todoRepository.getUserTags();
+
+      state = state.copyWith(todos: todos, userTags: userTags);
       _applyFiltersAndSort(); // 새로고침 후 필터링 다시 적용
     } catch (e) {
       state = state.copyWith(
@@ -239,5 +261,5 @@ class TodoListViewModel extends StateNotifier<TodoListViewState> {
 final todoListViewModelProvider =
     StateNotifierProvider<TodoListViewModel, TodoListViewState>((ref) {
       final todoRepository = ref.watch(todoRepositoryProvider);
-      return TodoListViewModel(todoRepository);
+      return TodoListViewModel(todoRepository, ref);
     });

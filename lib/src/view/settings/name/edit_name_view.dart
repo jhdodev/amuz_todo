@@ -1,4 +1,6 @@
 import 'package:amuz_todo/src/view/settings/name/edit_name_view_state.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/view/settings/name/edit_name_view_model.dart';
@@ -39,6 +41,7 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(editNameViewModelProvider);
+    final isDarkMode = ref.watch(isDarkModeProvider);
 
     // 에러 메시지 표시
     ref.listen<EditNameViewState>(editNameViewModelProvider, (previous, next) {
@@ -54,13 +57,20 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           '이름 변경',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
@@ -78,20 +88,36 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                 TextFormField(
                   controller: _nameController,
                   enabled: !state.isLoading,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
+                  style: TextStyle(
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
+                    fontSize: 16,
+                  ),
                   decoration: InputDecoration(
                     hintText: '이름',
-                    prefixIcon: const Icon(LucideIcons.user, size: 20),
-                    border: OutlineInputBorder(
+                    hintStyle: TextStyle(
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
+                    ),
+                    prefixIcon: Icon(
+                      LucideIcons.user,
+                      size: 20,
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.black,
+                    ),
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                        color: isDarkMode
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
+                        width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: isDarkMode
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -128,14 +154,22 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: isDarkMode
+                          ? Colors.red.shade900.withOpacity(0.3)
+                          : Colors.red.shade50,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(
+                        color: isDarkMode
+                            ? Colors.red.shade700
+                            : Colors.red.shade200,
+                      ),
                     ),
                     child: Text(
                       state.errorMessage!,
                       style: TextStyle(
-                        color: Colors.red.shade700,
+                        color: isDarkMode
+                            ? Colors.red.shade300
+                            : Colors.red.shade700,
                         fontSize: 14,
                       ),
                     ),
@@ -144,27 +178,29 @@ class _EditNameViewState extends ConsumerState<EditNameView> {
                 ElevatedButton(
                   onPressed: state.isLoading ? null : _updateName,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: isDarkMode
+                        ? AppColors.lightGrey
+                        : Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: state.isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.black : Colors.white,
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           '저장',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.black : Colors.white,
                           ),
                         ),
                 ),

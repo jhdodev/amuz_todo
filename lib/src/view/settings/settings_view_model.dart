@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amuz_todo/src/service/auth_service.dart';
 import 'package:amuz_todo/src/view/settings/settings_view_state.dart';
+
 import 'package:amuz_todo/util/route_path.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -142,6 +143,9 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
       final authService = _ref.read(authServiceProvider);
       await authService.signOut();
 
+      // 로그아웃 후 모든 상태 초기화
+      _invalidateAllProviders();
+
       print('🔥 SettingsViewModel: 로그아웃 성공');
 
       state = state.copyWith(
@@ -164,6 +168,16 @@ class SettingsViewModel extends StateNotifier<SettingsViewState> {
         errorMessage: '로그아웃에 실패했습니다: $e',
       );
     }
+  }
+
+  /// 모든 Provider 상태 무효화
+  void _invalidateAllProviders() {
+    print('🔥 SettingsViewModel: 모든 Provider 상태 무효화 시작');
+
+    // 사용자 관련 Provider 무효화 (TodoListViewModel이 자동으로 감지함)
+    _ref.invalidate(currentUserProvider);
+
+    print('🔥 SettingsViewModel: 모든 Provider 상태 무효화 완료');
   }
 
   /// 계정 삭제

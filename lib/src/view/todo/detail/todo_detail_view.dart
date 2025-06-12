@@ -1,6 +1,13 @@
-import 'package:amuz_todo/src/model/priority.dart';
+import 'package:amuz_todo/src/service/theme_service.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_model.dart';
 import 'package:amuz_todo/src/view/todo/detail/todo_detail_view_state.dart';
+import 'package:amuz_todo/src/view/common/widget/image_picker_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_options_action_sheet.dart';
+import 'package:amuz_todo/src/view/common/widget/image_full_screen_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/priority_selector_action_sheet.dart';
+import 'package:amuz_todo/src/view/todo/widget/todo_date_picker_dialog.dart';
+import 'package:amuz_todo/src/view/todo/widget/tag_widget.dart';
+import 'package:amuz_todo/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,72 +49,21 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
   }
 
   void _showImagePicker(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 첨부',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .pickImageFromGallery();
-            },
-            child: const Text('갤러리에서 사진 선택', style: TextStyle(fontSize: 16)),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImagePickerActionSheet.show(
+      context,
+      onGalleryTap: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .pickImageFromGallery(),
     );
   }
 
   void _showImageOptions(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '이미지 관리',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              _showImageFullScreen(context);
-            },
-            child: const Text('사진 크게 보기', style: TextStyle(fontSize: 16)),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .removeSelectedImage();
-            },
-            child: const Text(
-              '사진 삭제',
-              style: TextStyle(fontSize: 16, color: Colors.red),
-            ),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            '취소',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+    ImageOptionsActionSheet.show(
+      context,
+      onViewTap: () => _showImageFullScreen(context),
+      onDeleteTap: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .removeSelectedImage(),
     );
   }
 
@@ -120,75 +76,19 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
     if (selectedImage == null && existingImageUrl == null) return;
 
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.9),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: InteractiveViewer(
-                child: Center(
-                  child: selectedImage != null
-                      ? Image.file(selectedImage, fit: BoxFit.contain)
-                      : Image.network(existingImageUrl!, fit: BoxFit.contain),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    ImageFullScreenDialog.show(
+      context,
+      imageFile: selectedImage,
+      imageUrl: existingImageUrl,
     );
   }
 
   void _showPrioritySelector(BuildContext context) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text(
-          '우선 순위',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.high);
-              Navigator.pop(context);
-            },
-            child: const Text('높음'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.medium);
-              Navigator.pop(context);
-            },
-            child: const Text('보통'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              ref
-                  .read(todoDetailViewModelProvider(widget.todoId).notifier)
-                  .selectPriority(Priority.low);
-              Navigator.pop(context);
-            },
-            child: const Text('낮음'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('취소'),
-        ),
-      ),
+    PrioritySelectorActionSheet.show(
+      context,
+      onPrioritySelected: (priority) => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .selectPriority(priority),
     );
   }
 
@@ -196,98 +96,23 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
     final currentDueDate =
         ref.read(todoDetailViewModelProvider(widget.todoId)).selectedDueDate ??
         DateTime.now();
-    DateTime tempDate = currentDueDate;
 
-    showCupertinoModalPopup(
-      context: context,
-      builder: (BuildContext context) => Container(
-        height: 320,
-        padding: const EdgeInsets.only(top: 6.0),
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('취소'),
-                    ),
-                    const Text(
-                      '마감일 선택',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none,
-                        color: Colors.black,
-                      ),
-                    ),
-                    CupertinoButton(
-                      onPressed: () {
-                        ref
-                            .read(
-                              todoDetailViewModelProvider(
-                                widget.todoId,
-                              ).notifier,
-                            )
-                            .selectDueDate(tempDate);
-                        Navigator.pop(context);
-                      },
-                      child: const Text('완료'),
-                    ),
-                  ],
-                ),
-              ),
-              // 마감일 제거 버튼 추가
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: CupertinoButton(
-                  onPressed: () {
-                    ref
-                        .read(
-                          todoDetailViewModelProvider(widget.todoId).notifier,
-                        )
-                        .clearDueDate();
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    '마감일 제거',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: currentDueDate,
-                  minimumDate: DateTime.now().subtract(
-                    const Duration(hours: 1),
-                  ),
-                  maximumDate: DateTime.now().add(const Duration(days: 365)),
-                  onDateTimeChanged: (DateTime newDate) {
-                    tempDate = newDate;
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    TodoDatePickerDialog.show(
+      context,
+      initialDate: currentDueDate,
+      onDateSelected: (date) => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .selectDueDate(date),
+      onDateCleared: () => ref
+          .read(todoDetailViewModelProvider(widget.todoId).notifier)
+          .clearDueDate(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = ref.watch(isDarkModeProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer(
@@ -298,13 +123,20 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
             return Text(
               detailState.todo?.title ?? '',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
             );
           },
         ),
         centerTitle: true,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : Colors.black,
+        ),
         actions: [
           Consumer(
             builder: (context, ref, child) {
@@ -341,10 +173,10 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text(
+                    : Text(
                         '수정',
                         style: TextStyle(
-                          color: Colors.black,
+                          color: isDarkMode ? Colors.white : Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -365,7 +197,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '제목',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -382,20 +218,37 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
                     return TextField(
                       controller: _titleController,
-                      cursorColor: Colors.black,
+                      cursorColor: isDarkMode
+                          ? AppColors.lightGrey
+                          : Colors.black,
+                      style: TextStyle(
+                        color: isDarkMode
+                            ? AppColors.almostWhite
+                            : Colors.black,
+                        fontSize: 16,
+                      ),
                       decoration: InputDecoration(
                         hintText: "할 일을 입력해주세요.",
-                        border: OutlineInputBorder(
+                        hintStyle: TextStyle(
+                          color: isDarkMode
+                              ? AppColors.mediumGrey
+                              : Colors.grey,
+                        ),
+                        enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                            color: isDarkMode
+                                ? AppColors.almostBlack
+                                : AppColors.lightGrey,
+                            width: 1,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.4),
+                            color: isDarkMode
+                                ? AppColors.almostBlack
+                                : Colors.black.withOpacity(0.4),
                             width: 3,
                           ),
                         ),
@@ -410,9 +263,26 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                 const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    '설명',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  child: Row(
+                    children: [
+                      Text(
+                        '설명',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '사진 추가 후 탭하면 크게 보기와 삭제가 가능해요.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -433,20 +303,37 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
 
                           return TextField(
                             controller: _descriptionController,
-                            cursorColor: Colors.black,
+                            cursorColor: isDarkMode
+                                ? AppColors.lightGrey
+                                : Colors.black,
+                            style: TextStyle(
+                              color: isDarkMode
+                                  ? AppColors.almostWhite
+                                  : Colors.black,
+                              fontSize: 16,
+                            ),
                             decoration: InputDecoration(
                               hintText: "설명을 입력해주세요.",
-                              border: OutlineInputBorder(
+                              hintStyle: TextStyle(
+                                color: isDarkMode
+                                    ? AppColors.mediumGrey
+                                    : Colors.grey,
+                              ),
+                              enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                  width: 2,
+                                  color: isDarkMode
+                                      ? AppColors.almostBlack
+                                      : AppColors.lightGrey,
+                                  width: 1,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide(
-                                  color: Colors.black.withValues(alpha: 0.4),
+                                  color: isDarkMode
+                                      ? AppColors.almostBlack
+                                      : Colors.black.withOpacity(0.4),
                                   width: 3,
                                 ),
                               ),
@@ -483,11 +370,15 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                             decoration: BoxDecoration(
                               color: hasAnyImage
                                   ? Colors.transparent
-                                  : Colors.grey.shade200,
+                                  : (isDarkMode
+                                        ? AppColors.darkGrey
+                                        : Colors.grey.shade200),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 2,
+                                color: isDarkMode
+                                    ? AppColors.almostBlack
+                                    : AppColors.lightGrey,
+                                width: 1,
                               ),
                             ),
                             child: isUploading
@@ -542,9 +433,26 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                 const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    '태그',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  child: Row(
+                    children: [
+                      Text(
+                        '태그',
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        '입력하여 추가한 태그를 선택하세요.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -558,28 +466,38 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       height: 50,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            ...detailState.availableTags.map(
-                              (tag) => Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: _buildTag(
-                                  tag.name,
-                                  isSelected: detailState.selectedTags.any(
-                                    (t) => t.name == tag.name,
+                        child: detailState.availableTags.isEmpty
+                            ? const Align(
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Text(
+                                    '태그를 추가해 주세요.',
+                                    style: TextStyle(color: Colors.grey),
                                   ),
-                                  onTap: () => ref
-                                      .read(
-                                        todoDetailViewModelProvider(
-                                          widget.todoId,
-                                        ).notifier,
-                                      )
-                                      .toggleTag(tag),
                                 ),
+                              )
+                            : Row(
+                                children: [
+                                  ...detailState.availableTags.map(
+                                    (tag) => Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: TagWidget(
+                                        tag: tag.name,
+                                        isSelected: detailState.selectedTags
+                                            .any((t) => t.name == tag.name),
+                                        onTap: () => ref
+                                            .read(
+                                              todoDetailViewModelProvider(
+                                                widget.todoId,
+                                              ).notifier,
+                                            )
+                                            .toggleTag(tag),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
                       ),
                     );
                   },
@@ -587,15 +505,22 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                 const SizedBox(height: 20),
                 TextField(
                   controller: _tagController,
-                  cursorColor: Colors.black,
+                  cursorColor: isDarkMode ? AppColors.lightGrey : Colors.black,
+                  style: TextStyle(
+                    color: isDarkMode ? AppColors.almostWhite : Colors.black,
+                    fontSize: 16,
+                  ),
                   decoration: InputDecoration(
                     prefixText: '#',
-                    prefixStyle: const TextStyle(
-                      color: Colors.black,
+                    prefixStyle: TextStyle(
+                      color: isDarkMode ? AppColors.almostWhite : Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                     hintText: "태그를 입력해주세요.",
+                    hintStyle: TextStyle(
+                      color: isDarkMode ? AppColors.mediumGrey : Colors.grey,
+                    ),
                     suffixIcon: IconButton(
                       onPressed: () {
                         if (_tagController.text.trim().isNotEmpty) {
@@ -609,19 +534,26 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                           _tagController.clear();
                         }
                       },
-                      icon: const Icon(LucideIcons.plus),
+                      icon: Icon(
+                        LucideIcons.plus,
+                        color: isDarkMode ? AppColors.mediumGrey : Colors.black,
+                      ),
                     ),
-                    border: OutlineInputBorder(
+                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
-                        width: 2,
+                        color: isDarkMode
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
+                        width: 1,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.4),
+                        color: isDarkMode
+                            ? AppColors.almostBlack
+                            : Colors.black.withOpacity(0.4),
                         width: 3,
                       ),
                     ),
@@ -636,7 +568,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '우선 순위',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -649,7 +585,15 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300, width: 2),
+                      color: isDarkMode
+                          ? Colors.transparent
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: isDarkMode
+                            ? AppColors.almostBlack
+                            : AppColors.lightGrey,
+                        width: 1,
+                      ),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -660,14 +604,18 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                               .watch(todoDetailViewModelProvider(widget.todoId))
                               .selectedPriority
                               .displayName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black,
+                            color: isDarkMode
+                                ? AppColors.almostWhite
+                                : Colors.black,
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.keyboard_arrow_down,
-                          color: Colors.grey,
+                          color: isDarkMode
+                              ? AppColors.mediumGrey
+                              : Colors.grey,
                         ),
                       ],
                     ),
@@ -678,7 +626,11 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     '마감일',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -698,9 +650,14 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                           vertical: 16,
                         ),
                         decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.transparent
+                              : Colors.transparent,
                           border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 2,
+                            color: isDarkMode
+                                ? AppColors.almostBlack
+                                : AppColors.lightGrey,
+                            width: 1,
                           ),
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -714,13 +671,19 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
                               style: TextStyle(
                                 fontSize: 16,
                                 color: dueDate != null
-                                    ? Colors.black
-                                    : Colors.grey,
+                                    ? (isDarkMode
+                                          ? AppColors.almostWhite
+                                          : Colors.black)
+                                    : (isDarkMode
+                                          ? AppColors.mediumGrey
+                                          : Colors.grey),
                               ),
                             ),
-                            const Icon(
+                            Icon(
                               Icons.calendar_today,
-                              color: Colors.grey,
+                              color: isDarkMode
+                                  ? AppColors.mediumGrey
+                                  : Colors.grey,
                             ),
                           ],
                         ),
@@ -811,26 +774,4 @@ class _TodoDetailViewState extends ConsumerState<TodoDetailView> {
       ),
     );
   }
-}
-
-Widget _buildTag(String tag, {bool isSelected = false, VoidCallback? onTap}) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.black : Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Text(
-        '#$tag',
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-      ),
-    ),
-  );
 }
